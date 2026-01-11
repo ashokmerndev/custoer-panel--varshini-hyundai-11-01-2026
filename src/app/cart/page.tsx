@@ -645,7 +645,6 @@ export default function CartPage() {
         {/* Order Summary */}
         <div className={styles.orderSummary}>
           <h2 className={styles.summaryTitle}>Order Summary</h2>
-
           <div className={styles.summaryDetails}>
             <div className={styles.summaryRow}>
               <span className={styles.summaryLabel}>

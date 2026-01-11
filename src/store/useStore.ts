@@ -52,8 +52,10 @@ export interface Cart {
   totalItems: number;
   subtotal: number;
   tax: number;
+  taxPercentage: number;
   shippingCharges: number;
   totalAmount: number;
+
 }
 
 interface AppState {

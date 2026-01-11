@@ -77,7 +77,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (user) {
       // Redirect to Dashboard if logged in
-      router.replace('/dashboard');
+      router.replace('/');
     }
   }, [user, router]);
 
@@ -92,7 +92,7 @@ export default function LoginPage() {
     try {
       const result = await login(formData);
       if (result.success) {
-        router.push('/dashboard'); 
+        router.push('/'); 
       } else {
         setError(result.error || 'Invalid credentials.');
       }
