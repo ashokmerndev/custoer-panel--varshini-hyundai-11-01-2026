@@ -1,12 +1,18 @@
-// src/store/useStore.ts
-import { create } from 'zustand';
+import { create } from "zustand";
+
+// 1. Image Interface (Updated to match API)
+export interface ProductImage {
+  _id: string; // API sends _id
+  url: string;
+  publicId: string;
+}
 
 export interface User {
   id: string;
   name: string;
   email: string;
   phone: string;
-  role: 'customer' | 'admin';
+  role: "customer" | "admin";
   addresses?: Address[];
 }
 
@@ -20,22 +26,32 @@ export interface Address {
   isDefault: boolean;
 }
 
+// 2. Product Interface (Updated to match API & Fix Errors)
 export interface Product {
   _id: string;
   name: string;
-  partNumber: string;
-  description: string;
+  partNumber?: string;
+  description?: string;
   category: string;
-  compatibleModels: string[];
+  // API sends objects, but if you just need names, handled in component
+  compatibleModels?: any[];
+
   price: number;
   discountPrice?: number;
+  finalPrice?: number; // Added: Needed for Price Logic
+
   stock: number;
-  images: Array<{ url: string; publicId: string }>;
+  stockStatus?: string; // Added: API sends "In Stock"
+
+  // Optional helper to keep TS happy if you use 'status' manually anywhere
+  status?: "In Stock" | "Low Stock" | "Out of Stock" | string;
+
+  images: ProductImage[]; // Updated: Now includes _id
+
   specifications?: Record<string, any>;
   warrantyPeriod?: string;
   tags?: string[];
   isFeatured?: boolean;
-  status: 'In Stock' | 'Low Stock' | 'Out of Stock';
 }
 
 export interface CartItem {
@@ -55,7 +71,6 @@ export interface Cart {
   taxPercentage: number;
   shippingCharges: number;
   totalAmount: number;
-
 }
 
 interface AppState {
@@ -72,7 +87,7 @@ interface AppState {
   updateCartItemCount: () => void;
 
   // UI state
-  theme: 'dark' | 'light';
+  theme: "dark" | "light";
   toggleTheme: () => void;
   isCartDrawerOpen: boolean;
   toggleCartDrawer: () => void;
@@ -89,7 +104,8 @@ export const useStore = create<AppState>((set, get) => ({
   user: null,
   isAuthenticated: false,
   setUser: (user) => set({ user, isAuthenticated: !!user }),
-  logout: () => set({ user: null, isAuthenticated: false, cart: null, cartItemCount: 0 }),
+  logout: () =>
+    set({ user: null, isAuthenticated: false, cart: null, cartItemCount: 0 }),
 
   // Cart state
   cart: null,
@@ -100,23 +116,27 @@ export const useStore = create<AppState>((set, get) => ({
   cartItemCount: 0,
   updateCartItemCount: () => {
     const cart = get().cart;
-    const count = cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
+    const count =
+      cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
     set({ cartItemCount: count });
   },
 
   // UI state
-  theme: 'dark',
-  toggleTheme: () => set((state) => ({ 
-    theme: state.theme === 'dark' ? 'light' : 'dark' 
-  })),
+  theme: "dark",
+  toggleTheme: () =>
+    set((state) => ({
+      theme: state.theme === "dark" ? "light" : "dark",
+    })),
   isCartDrawerOpen: false,
-  toggleCartDrawer: () => set((state) => ({ 
-    isCartDrawerOpen: !state.isCartDrawerOpen 
-  })),
+  toggleCartDrawer: () =>
+    set((state) => ({
+      isCartDrawerOpen: !state.isCartDrawerOpen,
+    })),
   isMobileMenuOpen: false,
-  toggleMobileMenu: () => set((state) => ({ 
-    isMobileMenuOpen: !state.isMobileMenuOpen 
-  })),
+  toggleMobileMenu: () =>
+    set((state) => ({
+      isMobileMenuOpen: !state.isMobileMenuOpen,
+    })),
 
   // Loading states
   isLoading: false,

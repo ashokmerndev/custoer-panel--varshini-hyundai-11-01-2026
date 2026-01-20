@@ -1,15 +1,22 @@
 // src/app/wishlist/page.tsx
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Trash2, HeartOff, ArrowRight, Package, AlertTriangle } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-import { wishlistAPI, WishlistItem } from '@/lib/api/wishlist';
-import apiClient from '@/services/apiClient';
-import { useStore } from '@/store/useStore';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ShoppingCart,
+  Trash2,
+  HeartOff,
+  ArrowRight,
+  Package,
+  AlertTriangle,
+} from "lucide-react";
+import { toast } from "react-hot-toast";
+import { wishlistAPI, WishlistItem } from "@/lib/api/wishlist";
+import apiClient from "@/services/apiClient";
+import { useStore } from "@/store/useStore";
 
 export default function WishlistPage() {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
@@ -28,7 +35,7 @@ export default function WishlistPage() {
         setWishlistItems(response.products);
       }
     } catch (error) {
-      console.error('Failed to fetch wishlist', error);
+      console.error("Failed to fetch wishlist", error);
       // Don't show toast on 404/Empty, just show empty state
     } finally {
       setLoading(false);
@@ -37,39 +44,42 @@ export default function WishlistPage() {
 
   // Helper for Images
   const getImageUrl = (img: any) => {
-    if (!img) return '';
-    if (typeof img === 'string') return img;
-    return img.url || '';
+    if (!img) return "";
+    if (typeof img === "string") return img;
+    return img.url || "";
   };
 
   // 🗑️ Handle Remove Single Item
   const handleRemove = async (productId: string) => {
     const previousItems = [...wishlistItems];
     // Optimistic Update
-    setWishlistItems(items => items.filter(item => item.product._id !== productId));
-    toast.success('Removed from wishlist');
+    setWishlistItems((items) =>
+      items.filter((item) => item.product._id !== productId),
+    );
+    toast.success("Removed from wishlist");
 
     try {
       await wishlistAPI.toggleWishlist(productId);
     } catch (error) {
       setWishlistItems(previousItems); // Revert
-      toast.error('Failed to remove item');
+      toast.error("Failed to remove item");
     }
   };
 
   // 🧹 Handle Clear Entire Wishlist
   const handleClearAll = async () => {
-    if (!window.confirm('Are you sure you want to clear your wishlist?')) return;
+    if (!window.confirm("Are you sure you want to clear your wishlist?"))
+      return;
 
     try {
       setLoading(true);
       const response = await wishlistAPI.clearWishlist();
       if (response.success) {
         setWishlistItems([]);
-        toast.success('Wishlist cleared successfully');
+        toast.success("Wishlist cleared successfully");
       }
     } catch (error) {
-      toast.error('Failed to clear wishlist');
+      toast.error("Failed to clear wishlist");
     } finally {
       setLoading(false);
     }
@@ -81,7 +91,7 @@ export default function WishlistPage() {
 
     setActionLoading(item.product._id);
     try {
-      const response = await apiClient.post('/cart/add', {
+      const response = await apiClient.post("/cart/add", {
         productId: item.product._id,
         quantity: 1,
       });
@@ -93,7 +103,7 @@ export default function WishlistPage() {
         toggleCartDrawer();
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to add to cart');
+      toast.error(error.response?.data?.error || "Failed to add to cart");
     } finally {
       setActionLoading(null);
     }
@@ -104,9 +114,8 @@ export default function WishlistPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#050B14] text-gray-900 dark:text-white pt-24 pb-16 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-10 flex flex-col md:flex-row justify-between items-center gap-4"
@@ -116,21 +125,25 @@ export default function WishlistPage() {
               My Wishlist
             </h1>
             <p className="text-gray-500 dark:text-gray-400">
-              {wishlistItems.length} {wishlistItems.length === 1 ? 'item' : 'items'} saved
+              {wishlistItems.length}{" "}
+              {wishlistItems.length === 1 ? "item" : "items"} saved
             </p>
           </div>
-          
+
           {wishlistItems.length > 0 && (
             <div className="flex gap-4">
-              <button 
+              <button
                 onClick={handleClearAll}
                 className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors flex items-center gap-2"
               >
                 <Trash2 size={16} /> Clear All
               </button>
-             <Link href="/" className="mt-4 md:mt-0 text-sm font-medium text-hyundai-blue hover:underline flex items-center gap-1">
-               Continue Shopping <ArrowRight size={16} />
-             </Link>
+              <Link
+                href="/"
+                className="mt-4 md:mt-0 text-sm font-medium text-hyundai-blue hover:underline flex items-center gap-1"
+              >
+                Continue Shopping <ArrowRight size={16} />
+              </Link>
             </div>
           )}
         </motion.div>
@@ -139,15 +152,19 @@ export default function WishlistPage() {
         {wishlistItems.length === 0 ? (
           <EmptyState />
         ) : (
-          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <AnimatePresence mode='popLayout'>
+          <motion.div
+            layout
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          >
+            <AnimatePresence mode="popLayout">
               {wishlistItems.map((item) => {
                 const { product } = item;
                 const images = product.images || [];
-                const firstImage = Array.isArray(images) && images.length > 0 ? images[0] : null;
+                const firstImage =
+                  Array.isArray(images) && images.length > 0 ? images[0] : null;
                 const price = product.price || 0;
-                const discountPrice = product.discountPrice || 0;
-                const currentPrice = discountPrice > 0 ? discountPrice : price;
+                const currentPrice = product.finalPrice || price; // API returns 'finalPrice'
+                const isDiscounted = currentPrice < price; // Check if price is reduced
                 const isOutOfStock = product.stock <= 0;
 
                 return (
@@ -156,7 +173,11 @@ export default function WishlistPage() {
                     key={product._id}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                    exit={{
+                      opacity: 0,
+                      scale: 0.9,
+                      transition: { duration: 0.2 },
+                    }}
                     className="group relative bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl dark:shadow-none transition-all duration-300 flex flex-col"
                   >
                     {/* Remove Button */}
@@ -169,7 +190,10 @@ export default function WishlistPage() {
                     </button>
 
                     {/* Image Area */}
-                    <Link href={`/products/${product._id}`} className="relative aspect-square bg-gray-100 dark:bg-black/20 overflow-hidden">
+                    <Link
+                      href={`/products/${product._id}`}
+                      className="relative aspect-square bg-gray-100 dark:bg-black/20 overflow-hidden"
+                    >
                       {firstImage ? (
                         <Image
                           src={getImageUrl(firstImage)}
@@ -183,12 +207,12 @@ export default function WishlistPage() {
                           <Package size={40} />
                         </div>
                       )}
-                      
+
                       {isOutOfStock && (
                         <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
-                           <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-                             <AlertTriangle size={12} /> Out of Stock
-                           </span>
+                          <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                            <AlertTriangle size={12} /> Out of Stock
+                          </span>
                         </div>
                       )}
                     </Link>
@@ -209,9 +233,11 @@ export default function WishlistPage() {
 
                       <div className="mt-auto pt-2 flex items-end justify-between mb-4">
                         <div className="flex flex-col">
-                          {discountPrice > 0 ? (
+                          {isDiscounted ? (
                             <>
-                              <span className="text-xs text-gray-400 line-through">₹{price.toLocaleString()}</span>
+                              <span className="text-xs text-gray-400 line-through">
+                                ₹{price.toLocaleString()}
+                              </span>
                               <span className="text-lg font-bold text-gray-900 dark:text-white">
                                 ₹{currentPrice.toLocaleString()}
                               </span>
@@ -228,9 +254,10 @@ export default function WishlistPage() {
                         onClick={() => handleMoveToCart(item)}
                         disabled={isOutOfStock || actionLoading === product._id}
                         className={`w-full py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-all shadow-md
-                          ${isOutOfStock
-                            ? 'bg-gray-100 dark:bg-white/10 text-gray-400 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-hyundai-blue to-blue-600 text-white hover:shadow-lg hover:shadow-blue-500/20 active:scale-95'
+                          ${
+                            isOutOfStock
+                              ? "bg-gray-100 dark:bg-white/10 text-gray-400 cursor-not-allowed"
+                              : "bg-gradient-to-r from-hyundai-blue to-blue-600 text-white hover:shadow-lg hover:shadow-blue-500/20 active:scale-95"
                           }`}
                       >
                         {actionLoading === product._id ? (
@@ -238,7 +265,7 @@ export default function WishlistPage() {
                         ) : (
                           <>
                             <ShoppingCart size={16} />
-                            {isOutOfStock ? 'No Stock' : 'Add to Cart'}
+                            {isOutOfStock ? "No Stock" : "Add to Cart"}
                           </>
                         )}
                       </button>
@@ -257,7 +284,7 @@ export default function WishlistPage() {
 // 📦 Empty State Component
 function EmptyState() {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       className="flex flex-col items-center justify-center py-20 text-center"
@@ -265,7 +292,9 @@ function EmptyState() {
       <div className="w-24 h-24 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-6">
         <HeartOff size={40} className="text-gray-400 dark:text-gray-500" />
       </div>
-      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Your wishlist is empty</h3>
+      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        Your wishlist is empty
+      </h3>
       <p className="text-gray-500 dark:text-gray-400 max-w-md mb-8">
         Looks like you haven't saved any items yet.
       </p>
@@ -291,7 +320,10 @@ function LoadingSkeleton() {
         <div className="h-4 w-32 bg-gray-200 dark:bg-white/5 rounded-lg mb-10 animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white dark:bg-white/5 rounded-2xl p-4 border border-gray-200 dark:border-white/5 h-[350px]">
+            <div
+              key={i}
+              className="bg-white dark:bg-white/5 rounded-2xl p-4 border border-gray-200 dark:border-white/5 h-[350px]"
+            >
               <div className="w-full h-48 bg-gray-200 dark:bg-white/5 rounded-xl animate-pulse mb-4" />
               <div className="h-4 w-3/4 bg-gray-200 dark:bg-white/5 rounded mb-2 animate-pulse" />
               <div className="h-4 w-1/2 bg-gray-200 dark:bg-white/5 rounded mb-4 animate-pulse" />

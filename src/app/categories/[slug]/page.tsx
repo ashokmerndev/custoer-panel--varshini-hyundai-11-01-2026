@@ -258,7 +258,7 @@ export default function CategoryPage() {
               <ProductCard
                 key={product._id}
                 product={product as any}
-                onAddToCart={handleAddToCart}
+                onAddToCart={(p: any) => handleAddToCart(p)}
                 index={index}
               />
             ))}

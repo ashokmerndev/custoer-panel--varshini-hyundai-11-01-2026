@@ -1,13 +1,13 @@
 // src/app/checkout/page.tsx
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { useStore } from '@/store/useStore';
-import { useAuth } from '@/hooks/useAuth';
-import apiClient from '@/services/apiClient';
-import toast from 'react-hot-toast';
+import { useEffect, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
+import apiClient from "@/services/apiClient";
+import toast from "react-hot-toast";
 import {
   MapPin,
   Plus,
@@ -22,9 +22,9 @@ import {
   Wallet,
   DollarSign,
   AlertCircle,
-} from 'lucide-react';
-import { AddAddressModal } from '@/components/checkout/AddAddressModal';
-import styles from './page.module.css';
+} from "lucide-react";
+import { AddAddressModal } from "@/components/checkout/AddAddressModal";
+import styles from "./page.module.css";
 
 // ==================== TYPE DEFINITIONS ====================
 interface Address {
@@ -65,7 +65,7 @@ interface RazorpayResponse {
   razorpay_signature: string;
 }
 
-type PaymentMethod = 'Razorpay' | 'COD';
+type PaymentMethod = "Razorpay" | "COD";
 
 // Extend Window interface for Razorpay
 declare global {
@@ -82,8 +82,9 @@ export default function CheckoutPage() {
 
   // State management
   const [addresses, setAddresses] = useState<Address[]>([]);
-  const [selectedAddressId, setSelectedAddressId] = useState<string>('');
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('Razorpay');
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<PaymentMethod>("Razorpay");
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
@@ -93,14 +94,14 @@ export default function CheckoutPage() {
   // ==================== EFFECTS ====================
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      toast.error('Please login to continue');
-      router.push('/login');
+      toast.error("Please login to continue");
+      router.push("/login");
       return;
     }
 
     if (!authLoading && isAuthenticated && (!cart || cart.items.length === 0)) {
-      toast.error('Your cart is empty');
-      router.push('/cart');
+      toast.error("Your cart is empty");
+      router.push("/cart");
       return;
     }
 
@@ -119,27 +120,27 @@ export default function CheckoutPage() {
 
     const existingScript = document.querySelector('script[src*="razorpay"]');
     if (existingScript) {
-      existingScript.addEventListener('load', () => {
+      existingScript.addEventListener("load", () => {
         setRazorpayLoaded(true);
       });
       return;
     }
 
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
-    
+
     script.onload = () => {
       setRazorpayLoaded(true);
       setScriptError(false);
     };
-    
+
     script.onerror = () => {
       setScriptError(true);
       setRazorpayLoaded(false);
-      toast.error('Failed to load payment gateway');
+      toast.error("Failed to load payment gateway");
     };
-    
+
     document.body.appendChild(script);
   }, []);
 
@@ -147,12 +148,14 @@ export default function CheckoutPage() {
   const fetchAddresses = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/auth/profile');
+      const response = await apiClient.get("/auth/profile");
       if (response.data.success) {
         const userAddresses = response.data.data.user.addresses || [];
         setAddresses(userAddresses);
 
-        const defaultAddress = userAddresses.find((addr: Address) => addr.isDefault);
+        const defaultAddress = userAddresses.find(
+          (addr: Address) => addr.isDefault,
+        );
         if (defaultAddress) {
           setSelectedAddressId(defaultAddress._id);
         } else if (userAddresses.length > 0) {
@@ -160,8 +163,8 @@ export default function CheckoutPage() {
         }
       }
     } catch (error: any) {
-      console.error('Error fetching addresses:', error);
-      toast.error('Failed to load addresses');
+      console.error("Error fetching addresses:", error);
+      toast.error("Failed to load addresses");
     } finally {
       setLoading(false);
     }
@@ -171,18 +174,19 @@ export default function CheckoutPage() {
   const handleAddressAdded = useCallback(() => {
     setShowAddAddressModal(false);
     fetchAddresses();
-    toast.success('Address added successfully');
+    toast.success("Address added successfully");
   }, []);
 
   // ==================== COD PAYMENT HANDLER ====================
   const handleCODPayment = async () => {
+    // 1. Basic Validations
     if (!selectedAddressId) {
-      toast.error('Please select a delivery address');
+      toast.error("Please select a delivery address");
       return;
     }
 
     if (!cart) {
-      toast.error('Cart is empty');
+      toast.error("Cart is empty");
       return;
     }
 
@@ -191,151 +195,187 @@ export default function CheckoutPage() {
     try {
       const orderPayload = {
         shippingAddressId: selectedAddressId,
-        paymentMethod: 'COD',
+        paymentMethod: "COD",
       };
 
-      const orderResponse: OrderResponse = await apiClient.post('/orders', orderPayload);
+      // 2. API Call (Renamed response to prevent confusion)
+      // Axios returns the actual backend JSON inside the 'data' property
+      const response = await apiClient.post("/orders", orderPayload);
 
-      if (!orderResponse.data.success) {
-        throw new Error('Failed to create order');
+      // response.data is your actual API JSON: { success: true, data: { order: ... } }
+      const apiResponse = response.data;
+
+      console.log("Full API Response:", apiResponse);
+
+      // 3. Check Success Flag
+      if (!apiResponse.success) {
+        throw new Error(apiResponse.message || "Failed to create order");
       }
 
-      const orderId = orderResponse.data.data.order._id;
-      setCart(null);
-      toast.success('Order placed successfully!');
+      // 4. Correct Data Extraction
+      // Path: apiResponse -> data -> order -> _id
+      const orderId = apiResponse.data?.order?._id;
+
+      if (!orderId) {
+        throw new Error("Order ID missing in response");
+      }
+
+      // 5. Success Handling
+      //setCart(null);
+      toast.success(apiResponse.message || "Order placed successfully!");
       router.push(`/orders/success?orderId=${orderId}`);
     } catch (error: any) {
-      console.error('COD Payment error:', error);
-      const errorMessage = error.response?.data?.error || 'Failed to place order';
+      console.error("COD Payment error:", error);
+
+      // 6. Improved Error Message Handling
+      // Usually backend sends error message in 'message' field, similar to success
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to place order";
+
       toast.error(errorMessage);
     } finally {
       setProcessing(false);
     }
   };
-
   // ==================== RAZORPAY PAYMENT HANDLER ====================
-  const handleRazorpayPayment = async () => {
-    if (!selectedAddressId) {
-      toast.error('Please select a delivery address');
-      return;
-    }
+  // const handleRazorpayPayment = async () => {
+  //   if (!selectedAddressId) {
+  //     toast.error("Please select a delivery address");
+  //     return;
+  //   }
 
-    if (!razorpayLoaded || scriptError) {
-      toast.error('Payment gateway not ready. Please refresh.');
-      return;
-    }
+  //   if (!razorpayLoaded || scriptError) {
+  //     toast.error("Payment gateway not ready. Please refresh.");
+  //     return;
+  //   }
 
-    if (!cart) {
-      toast.error('Cart is empty');
-      return;
-    }
+  //   if (!cart) {
+  //     toast.error("Cart is empty");
+  //     return;
+  //   }
 
-    setProcessing(true);
+  //   setProcessing(true);
 
-    try {
-      const orderPayload = {
-        shippingAddressId: selectedAddressId,
-        paymentMethod: 'Razorpay',
-      };
+  //   try {
+  //     const orderPayload = {
+  //       shippingAddressId: selectedAddressId,
+  //       paymentMethod: "Razorpay",
+  //     };
 
-      const orderResponse: OrderResponse = await apiClient.post('/orders', orderPayload);
+  //     //const orderResponse: OrderResponse = await apiClient.post('/orders', orderPayload);
+  //     // Remove ': OrderResponse' and add '<OrderResponse>' after post
+  //     const orderResponse = await apiClient.post<OrderResponse>(
+  //       "/orders",
+  //       orderPayload,
+  //     );
 
-      if (!orderResponse.data.success) {
-        throw new Error('Failed to create order');
-      }
+  //     if (!orderResponse.data.success) {
+  //       throw new Error("Failed to create order");
+  //     }
 
-      const orderId = orderResponse.data.data.order._id;
-      const orderNumber = orderResponse.data.data.order.orderNumber;
+  //     const orderId = orderResponse.data.data.order._id;
+  //     const orderNumber = orderResponse.data.data.order.orderNumber;
 
-      const razorpayPayload = { orderId: orderId };
+  //     const razorpayPayload = { orderId: orderId };
 
-      const razorpayResponse: RazorpayOrderResponse = await apiClient.post(
-        '/payments/create-razorpay-order',
-        razorpayPayload
-      );
+  //     // const razorpayResponse: RazorpayOrderResponse = await apiClient.post(
+  //     //   '/payments/create-razorpay-order',
+  //     //   razorpayPayload
+  //     // );
+  //     const razorpayResponse = await apiClient.post<RazorpayOrderResponse>(
+  //       "/payments/create-razorpay-order",
+  //       razorpayPayload,
+  //     );
 
-      if (!razorpayResponse.data.success) {
-        throw new Error('Failed to initialize payment');
-      }
+  //     if (!razorpayResponse.data.success) {
+  //       throw new Error("Failed to initialize payment");
+  //     }
 
-      const { razorpayOrderId, amount, keyId, currency } = razorpayResponse.data.data;
+  //     const { razorpayOrderId, amount, keyId, currency } =
+  //       razorpayResponse.data.data;
 
-      const options = {
-        key: keyId,
-        amount: amount,
-        currency: currency,
-        name: 'Hyundai Spares',
-        description: `Order #${orderNumber}`,
-        order_id: razorpayOrderId,
-        handler: async (response: RazorpayResponse) => {
-          try {
-            const verifyPayload = {
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-              orderId: orderId,
-            };
+  //     const options = {
+  //       key: keyId,
+  //       amount: amount,
+  //       currency: currency,
+  //       name: "Hyundai Spares",
+  //       description: `Order #${orderNumber}`,
+  //       order_id: razorpayOrderId,
+  //       handler: async (response: RazorpayResponse) => {
+  //         try {
+  //           const verifyPayload = {
+  //             razorpayOrderId: response.razorpay_order_id,
+  //             razorpayPaymentId: response.razorpay_payment_id,
+  //             razorpaySignature: response.razorpay_signature,
+  //             orderId: orderId,
+  //           };
 
-            const verifyResponse = await apiClient.post(
-              '/payments/verify-razorpay-payment',
-              verifyPayload
-            );
+  //           const verifyResponse = await apiClient.post(
+  //             "/payments/verify-razorpay-payment",
+  //             verifyPayload,
+  //           );
 
-            if (verifyResponse.data.success) {
-              setCart(null);
-              toast.success('Payment successful!');
-              router.push(`/orders/success?orderId=${orderId}`);
-            } else {
-              throw new Error('Payment verification failed');
-            }
-          } catch (verifyError: any) {
-            console.error('Payment verification error:', verifyError);
-            toast.error('Payment verification failed. Contact support with Order ID: ' + orderNumber);
-            setTimeout(() => router.push('/orders'), 3000);
-          }
-        },
-        prefill: {
-          name: user?.name || '',
-          email: user?.email || '',
-          contact: user?.phone || '',
-        },
-        theme: {
-          color: '#00AAD2',
-        },
-        modal: {
-          ondismiss: () => {
-            setProcessing(false);
-            toast.error('Payment cancelled');
-            setTimeout(() => router.push('/orders'), 2000);
-          },
-        },
-      };
+  //           if (verifyResponse.data.success) {
+  //             setCart(null);
+  //             toast.success("Payment successful!");
+  //             router.push(`/orders/success?orderId=${orderId}`);
+  //           } else {
+  //             throw new Error("Payment verification failed");
+  //           }
+  //         } catch (verifyError: any) {
+  //           console.error("Payment verification error:", verifyError);
+  //           toast.error(
+  //             "Payment verification failed. Contact support with Order ID: " +
+  //               orderNumber,
+  //           );
+  //           setTimeout(() => router.push("/orders"), 3000);
+  //         }
+  //       },
+  //       prefill: {
+  //         name: user?.name || "",
+  //         email: user?.email || "",
+  //         contact: user?.phone || "",
+  //       },
+  //       theme: {
+  //         color: "#00AAD2",
+  //       },
+  //       modal: {
+  //         ondismiss: () => {
+  //           setProcessing(false);
+  //           toast.error("Payment cancelled");
+  //           setTimeout(() => router.push("/orders"), 2000);
+  //         },
+  //       },
+  //     };
 
-      const razorpay = new window.Razorpay(options);
-      
-      razorpay.on('payment.failed', (response: any) => {
-        console.error('Payment failed:', response.error);
-        setProcessing(false);
-        toast.error(`Payment failed: ${response.error.description}`);
-        setTimeout(() => router.push('/orders'), 2000);
-      });
+  //     const razorpay = new window.Razorpay(options);
 
-      razorpay.open();
-      setProcessing(false);
-    } catch (error: any) {
-      console.error('Payment error:', error);
-      const errorMessage = error.response?.data?.error || 'Payment failed';
-      toast.error(errorMessage);
-      setProcessing(false);
-    }
-  };
+  //     razorpay.on("payment.failed", (response: any) => {
+  //       console.error("Payment failed:", response.error);
+  //       setProcessing(false);
+  //       toast.error(`Payment failed: ${response.error.description}`);
+  //       setTimeout(() => router.push("/orders"), 2000);
+  //     });
+
+  //     razorpay.open();
+  //     setProcessing(false);
+  //   } catch (error: any) {
+  //     console.error("Payment error:", error);
+  //     const errorMessage = error.response?.data?.error || "Payment failed";
+  //     toast.error(errorMessage);
+  //     setProcessing(false);
+  //   }
+  // };
 
   // ==================== UNIFIED PAYMENT HANDLER ====================
   const handlePayment = () => {
-    if (selectedPaymentMethod === 'COD') {
+    if (selectedPaymentMethod === "COD") {
       handleCODPayment();
     } else {
-      handleRazorpayPayment();
+      // handleRazorpayPayment();
     }
   };
 
@@ -402,7 +442,9 @@ export default function CheckoutPage() {
                       transition={{ delay: index * 0.1 }}
                       onClick={() => setSelectedAddressId(address._id)}
                       className={`${styles.addressCard} ${
-                        selectedAddressId === address._id ? styles.addressCardSelected : ''
+                        selectedAddressId === address._id
+                          ? styles.addressCardSelected
+                          : ""
                       }`}
                     >
                       {selectedAddressId === address._id && (
@@ -416,14 +458,22 @@ export default function CheckoutPage() {
                       )}
 
                       <div className={styles.addressType}>
-                        {address.addressType === 'Home' ? <Home size={20} /> : <Building size={20} />}
+                        {address.addressType === "Home" ? (
+                          <Home size={20} />
+                        ) : (
+                          <Building size={20} />
+                        )}
                         <span>{address.addressType}</span>
-                        {address.isDefault && <span className={styles.defaultBadge}>Default</span>}
+                        {address.isDefault && (
+                          <span className={styles.defaultBadge}>Default</span>
+                        )}
                       </div>
 
                       <div className={styles.addressDetails}>
                         <p>{address.street}</p>
-                        <p>{address.city}, {address.state}</p>
+                        <p>
+                          {address.city}, {address.state}
+                        </p>
                         <p>PIN: {address.pincode}</p>
                       </div>
                     </motion.div>
@@ -458,12 +508,14 @@ export default function CheckoutPage() {
             <div className={styles.paymentMethods}>
               <motion.div
                 whileHover={{ scale: 1.02 }}
-                onClick={() => setSelectedPaymentMethod('Razorpay')}
+                onClick={() => setSelectedPaymentMethod("Razorpay")}
                 className={`${styles.paymentCard} ${
-                  selectedPaymentMethod === 'Razorpay' ? styles.paymentCardSelected : ''
+                  selectedPaymentMethod === "Razorpay"
+                    ? styles.paymentCardSelected
+                    : ""
                 }`}
               >
-                {selectedPaymentMethod === 'Razorpay' && (
+                {selectedPaymentMethod === "Razorpay" && (
                   <div className={styles.paymentSelectedBadge}>
                     <CheckCircle size={20} />
                   </div>
@@ -473,7 +525,7 @@ export default function CheckoutPage() {
                 <p className={styles.paymentDescription}>
                   Pay with Card, UPI, Net Banking
                 </p>
-                {!razorpayLoaded && selectedPaymentMethod === 'Razorpay' && (
+                {!razorpayLoaded && selectedPaymentMethod === "Razorpay" && (
                   <div className="flex items-center gap-2 mt-2 text-xs text-yellow-500">
                     <AlertCircle size={14} />
                     <span>Loading...</span>
@@ -483,12 +535,14 @@ export default function CheckoutPage() {
 
               <motion.div
                 whileHover={{ scale: 1.02 }}
-                onClick={() => setSelectedPaymentMethod('COD')}
+                onClick={() => setSelectedPaymentMethod("COD")}
                 className={`${styles.paymentCard} ${
-                  selectedPaymentMethod === 'COD' ? styles.paymentCardSelected : ''
+                  selectedPaymentMethod === "COD"
+                    ? styles.paymentCardSelected
+                    : ""
                 }`}
               >
-                {selectedPaymentMethod === 'COD' && (
+                {selectedPaymentMethod === "COD" && (
                   <div className={styles.paymentSelectedBadge}>
                     <CheckCircle size={20} />
                   </div>
@@ -514,7 +568,7 @@ export default function CheckoutPage() {
 
           <div className={styles.itemsPreview}>
             <p className={styles.itemsCount}>
-              {cart.totalItems} {cart.totalItems === 1 ? 'item' : 'items'}
+              {cart.totalItems} {cart.totalItems === 1 ? "item" : "items"}
             </p>
             <div className={styles.itemsList}>
               {cart.items.slice(0, 3).map((item) => (
@@ -526,7 +580,9 @@ export default function CheckoutPage() {
                 </div>
               ))}
               {cart.items.length > 3 && (
-                <p className={styles.moreItems}>+{cart.items.length - 3} more</p>
+                <p className={styles.moreItems}>
+                  +{cart.items.length - 3} more
+                </p>
               )}
             </div>
           </div>
@@ -574,7 +630,9 @@ export default function CheckoutPage() {
             whileHover={{ scale: processing ? 1 : 1.02 }}
             whileTap={{ scale: processing ? 1 : 0.98 }}
             onClick={handlePayment}
-            disabled={processing || !selectedAddressId || addresses.length === 0}
+            disabled={
+              processing || !selectedAddressId || addresses.length === 0
+            }
             className={styles.paymentButton}
           >
             {processing ? (
@@ -584,7 +642,7 @@ export default function CheckoutPage() {
               </>
             ) : (
               <>
-                {selectedPaymentMethod === 'Razorpay' ? (
+                {selectedPaymentMethod === "Razorpay" ? (
                   <>
                     <CreditCard size={20} />
                     Pay ₹{cart.totalAmount}
@@ -602,9 +660,9 @@ export default function CheckoutPage() {
           <div className={styles.securityBadge}>
             <CheckCircle size={16} className="text-green-500" />
             <span>
-              {selectedPaymentMethod === 'Razorpay'
-                ? 'Secure payment by Razorpay'
-                : 'Safe Cash on Delivery'}
+              {selectedPaymentMethod === "Razorpay"
+                ? "Secure payment by Razorpay"
+                : "Safe Cash on Delivery"}
             </span>
           </div>
         </motion.div>
@@ -631,10 +689,19 @@ function LoadingSkeleton() {
       </div>
       <div className={styles.content}>
         <div className={styles.leftColumn}>
-          <div className={`${styles.section} skeleton`} style={{ height: '400px' }} />
-          <div className={`${styles.section} skeleton`} style={{ height: '300px' }} />
+          <div
+            className={`${styles.section} skeleton`}
+            style={{ height: "400px" }}
+          />
+          <div
+            className={`${styles.section} skeleton`}
+            style={{ height: "300px" }}
+          />
         </div>
-        <div className={`${styles.orderSummary} skeleton`} style={{ height: '500px' }} />
+        <div
+          className={`${styles.orderSummary} skeleton`}
+          style={{ height: "500px" }}
+        />
       </div>
     </div>
   );

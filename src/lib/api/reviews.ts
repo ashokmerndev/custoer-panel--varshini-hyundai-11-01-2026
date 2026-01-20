@@ -1,5 +1,5 @@
 // lib/api/reviews.ts
-import axios from 'axios';
+import axios from "axios";
 import {
   ReviewsResponse,
   ReviewStatsResponse,
@@ -7,14 +7,15 @@ import {
   CreateReviewData,
   UpdateReviewData,
   Review,
-} from '@/types';
+} from "../../../types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // Get auth token from localStorage
 const getAuthToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('token');
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("token");
   }
   return null;
 };
@@ -35,8 +36,10 @@ api.interceptors.request.use((config) => {
 
 export const reviewAPI = {
   // Create a new review
-  createReview: async (reviewData: CreateReviewData): Promise<{ success: boolean; message: string; review: Review }> => {
-    const { data } = await api.post('/reviews', reviewData);
+  createReview: async (
+    reviewData: CreateReviewData,
+  ): Promise<{ success: boolean; message: string; review: Review }> => {
+    const { data } = await api.post("/reviews", reviewData);
     return data;
   },
 
@@ -46,11 +49,13 @@ export const reviewAPI = {
     params?: {
       page?: number;
       limit?: number;
-      sortBy?: 'createdAt' | 'rating' | 'helpful';
-      order?: 'asc' | 'desc';
-    }
+      sortBy?: "createdAt" | "rating" | "helpful";
+      order?: "asc" | "desc";
+    },
   ): Promise<ReviewsResponse> => {
-    const { data } = await api.get(`/reviews/products/${productId}/reviews`, { params });
+    const { data } = await api.get(`/reviews/products/${productId}/reviews`, {
+      params,
+    });
     return data;
   },
 
@@ -61,13 +66,18 @@ export const reviewAPI = {
   },
 
   // Update a review
-  updateReview: async (reviewId: string, reviewData: UpdateReviewData): Promise<{ success: boolean; message: string; review: Review }> => {
+  updateReview: async (
+    reviewId: string,
+    reviewData: UpdateReviewData,
+  ): Promise<{ success: boolean; message: string; review: Review }> => {
     const { data } = await api.put(`/reviews/${reviewId}`, reviewData);
     return data;
   },
 
   // Delete a review
-  deleteReview: async (reviewId: string): Promise<{ success: boolean; message: string }> => {
+  deleteReview: async (
+    reviewId: string,
+  ): Promise<{ success: boolean; message: string }> => {
     const { data } = await api.delete(`/reviews/${reviewId}`);
     return data;
   },
@@ -79,7 +89,9 @@ export const reviewAPI = {
   },
 
   // Mark review as helpful
-  markHelpful: async (reviewId: string): Promise<{ success: boolean; helpful: number }> => {
+  markHelpful: async (
+    reviewId: string,
+  ): Promise<{ success: boolean; helpful: number }> => {
     const { data } = await api.post(`/reviews/${reviewId}/helpful`);
     return data;
   },

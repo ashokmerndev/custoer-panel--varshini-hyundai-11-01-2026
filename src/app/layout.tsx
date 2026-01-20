@@ -9,6 +9,7 @@ import { Navbar } from '@/components/Navbar';
 import { CartDrawer } from '@/components/CartDrawer';
 import { WhatsAppWidget } from '@/components/WhatsAppWidget';
 import { Footer } from '@/components/Footer';
+import ReviewsCarousel from '@/components/ReviewsCarousel';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -40,6 +41,7 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen bg-[#050B14] text-white antialiased">
             <Navbar />
             <main className="flex-1">{children}</main>
+            <ReviewsCarousel />
             <Footer />
           </div>
           <CartDrawer />

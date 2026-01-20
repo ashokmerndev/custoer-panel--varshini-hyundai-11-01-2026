@@ -329,6 +329,8 @@ import { Product, useStore } from '@/store/useStore';
 import apiClient from '@/services/apiClient';
 import toast from 'react-hot-toast';
 import { Search, Filter, ChevronRight, Sparkles } from 'lucide-react';
+import ProductCarousel from '@/components/ProductCarousel';
+import FestivalCarousel from '@/components/FestivalCarousel';
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -528,7 +530,9 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </section>
-
+      <FestivalCarousel />
+      <ProductCarousel />
+    
       {/* Products Section */}
       <section id="products" className="py-16 px-4 md:px-8 bg-white dark:bg-[#0A101F] transition-colors duration-300">
         <div className="max-w-7xl mx-auto">

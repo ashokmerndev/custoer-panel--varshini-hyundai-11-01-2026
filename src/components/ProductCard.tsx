@@ -36,10 +36,10 @@
 //   index?: number;
 // }
 
-// export const ProductCard: React.FC<ProductCardProps> = ({ 
-//   product, 
+// export const ProductCard: React.FC<ProductCardProps> = ({
+//   product,
 //   onAddToCart,
-//   index = 0 
+//   index = 0
 // }) => {
 //   const [isHovered, setIsHovered] = useState(false);
 //   const [imageError, setImageError] = useState(false);
@@ -48,7 +48,7 @@
 //   const productId = product._id || product.id;
 
 //   if (!productId) {
-//     return null; 
+//     return null;
 //   }
 
 //   // 🔧 SMART IMAGE URL FIX
@@ -64,21 +64,21 @@
 
 //     // 3. If it's already a full URL (Cloudinary), return it
 //     if (imagePath.startsWith('http')) return imagePath;
-    
+
 //     // 4. If relative, prepend backend URL
 //     const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
 //     const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
-    
+
 //     return `${baseUrl}/${cleanPath}`;
 //   };
 
 //   const displayImage = getImageUrl();
-  
+
 //   // 🖼️ FALLBACK IMAGE
 //   const fallbackImage = "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=600&auto=format&fit=crop";
 
 //   // Calculate Discount
-//   const discount = product.discountPrice 
+//   const discount = product.discountPrice
 //     ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
 //     : 0;
 
@@ -95,10 +95,10 @@
 //       initial={{ opacity: 0, y: 50 }}
 //       whileInView={{ opacity: 1, y: 0 }}
 //       viewport={{ once: true, margin: "-50px" }}
-//       transition={{ 
-//         duration: 0.5, 
+//       transition={{
+//         duration: 0.5,
 //         delay: index * 0.05,
-//         ease: [0.22, 1, 0.36, 1] 
+//         ease: [0.22, 1, 0.36, 1]
 //       }}
 //       onHoverStart={() => setIsHovered(true)}
 //       onHoverEnd={() => setIsHovered(false)}
@@ -106,13 +106,13 @@
 //     >
 //       <Link href={`/products/${productId}`} className="block h-full">
 //         <div className="relative h-full bg-white dark:bg-white/5 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-hyundai-blue/20 transition-all duration-300 flex flex-col">
-//           <WishlistButton 
-//         productId={product._id} 
+//           <WishlistButton
+//         productId={product._id}
 //         showText={true}
 //       />
 //           {/* ✨ Glow Effect */}
-//           <div 
-//             className={`absolute inset-0 bg-hyundai-blue/10 pointer-events-none transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`} 
+//           <div
+//             className={`absolute inset-0 bg-hyundai-blue/10 pointer-events-none transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
 //           />
 
 //           {/* 🏷️ Status Badges */}
@@ -153,7 +153,7 @@
 //                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
 //                 unoptimized={true} // Helps with external Cloudinary images
 //               />
-              
+
 //               {/* Fallback Overlay */}
 //                {imageError && (
 //                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 dark:bg-white/5 text-gray-400">
@@ -165,7 +165,7 @@
 
 //             {/* Quick Actions (Hover) */}
 //             <div className="absolute right-3 bottom-3 flex flex-col gap-2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
-//               <button 
+//               <button
 //                 onClick={(e) => { e.preventDefault(); }}
 //                 className="p-2.5 bg-white text-gray-700 rounded-full shadow-lg hover:bg-hyundai-blue hover:text-white transition-colors"
 //               >
@@ -188,7 +188,7 @@
 //             <h3 className="font-semibold text-gray-900 dark:text-white text-base line-clamp-2 mb-2 group-hover:text-hyundai-blue transition-colors">
 //               {product.name}
 //             </h3>
-            
+
 //             <div className="mt-auto pt-2 flex items-end justify-between">
 //               <div className="flex flex-col">
 //                  {product.discountPrice ? (
@@ -212,8 +212,8 @@
 //               onClick={handleAddToCart}
 //               disabled={product.stock <= 0}
 //               className={`mt-4 w-full py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-all shadow-lg shadow-hyundai-blue/10
-//                 ${product.stock <= 0 
-//                   ? 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed' 
+//                 ${product.stock <= 0
+//                   ? 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed'
 //                   : 'bg-gradient-to-r from-hyundai-blue to-blue-600 text-white hover:shadow-hyundai-blue/30'
 //                 }`}
 //             >
@@ -233,21 +233,15 @@
 //   );
 // };
 
-
-
-
-
-
-
 // src/components/ProductCard.tsx
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
-import Link from 'next/link';
-import { ShoppingCart, Eye, Zap, Image as ImageIcon } from 'lucide-react';
-import WishlistButton from './WishlistButton';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { ShoppingCart, Eye, Zap, Image as ImageIcon } from "lucide-react";
+import WishlistButton from "./WishlistButton";
 
 // Interfaces
 interface ProductImage {
@@ -277,10 +271,10 @@ interface ProductCardProps {
   index?: number;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ 
-  product, 
+export const ProductCard: React.FC<ProductCardProps> = ({
+  product,
   onAddToCart,
-  index = 0 
+  index = 0,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -289,7 +283,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const productId = product._id || product.id;
 
   if (!productId) {
-    return null; 
+    return null;
   }
 
   // Smart Image URL Fix
@@ -299,19 +293,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     const imagePath = imageObj.url;
 
     if (!imagePath) return null;
-    if (imagePath.startsWith('http')) return imagePath;
-    
-    const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
-    
+    if (imagePath.startsWith("http")) return imagePath;
+
+    const cleanPath = imagePath.startsWith("/")
+      ? imagePath.slice(1)
+      : imagePath;
+    const baseUrl =
+      process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
+      "http://localhost:5000";
+
     return `${baseUrl}/${cleanPath}`;
   };
 
   const displayImage = getImageUrl();
-  const fallbackImage = "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=600&auto=format&fit=crop";
+  const fallbackImage =
+    "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=600&auto=format&fit=crop";
 
-  const discount = product.discountPrice 
-    ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
+  const discount = product.discountPrice
+    ? Math.round(
+        ((product.price - product.discountPrice) / product.price) * 100,
+      )
     : 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -327,10 +328,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ 
-        duration: 0.5, 
+      transition={{
+        duration: 0.5,
         delay: index * 0.05,
-        ease: [0.22, 1, 0.36, 1] 
+        ease: [0.22, 1, 0.36, 1],
       }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -338,19 +339,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     >
       <Link href={`/products/${productId}`} className="block h-full">
         <div className="relative h-full bg-white dark:bg-white/5 backdrop-blur-md border border-gray-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl dark:shadow-none hover:border-blue-200 dark:hover:border-white/20 transition-all duration-300 flex flex-col">
-          
           {/* ✨ Glow Effect */}
-          <div 
-            className={`absolute inset-0 bg-blue-50/50 dark:bg-hyundai-blue/10 pointer-events-none transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`} 
+          <div
+            className={`absolute inset-0 bg-blue-50/50 dark:bg-hyundai-blue/10 pointer-events-none transition-opacity duration-500 ${isHovered ? "opacity-100" : "opacity-0"}`}
           />
 
           {/* 🖼️ Image Container */}
           <div className="relative aspect-square overflow-hidden bg-gray-100 dark:bg-black/20 border-b border-gray-100 dark:border-white/5">
-            
             {/* ❤️ WISHLIST BUTTON (Top Right) */}
             <div className="absolute top-3 right-3 z-30">
-              <WishlistButton 
-                productId={product._id} 
+              <WishlistButton
+                productId={product._id}
                 className="bg-white/80 dark:bg-black/50 backdrop-blur-sm shadow-md hover:bg-white dark:hover:bg-black/70"
               />
             </div>
@@ -389,19 +388,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 unoptimized={true}
               />
-              
+
               {imageError && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 dark:bg-white/5 text-gray-400">
-                   <ImageIcon size={32} className="mb-2 opacity-50"/>
-                   <span className="text-xs">Preview Mode</span>
+                  <ImageIcon size={32} className="mb-2 opacity-50" />
+                  <span className="text-xs">Preview Mode</span>
                 </div>
               )}
             </motion.div>
 
             {/* Quick Actions (Bottom Right - Removed Duplicate Heart) */}
             <div className="absolute right-3 bottom-3 flex flex-col gap-2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
-              <button 
-                onClick={(e) => { e.preventDefault(); /* Open Quick View Logic */ }}
+              <button
+                onClick={(e) => {
+                  e.preventDefault(); /* Open Quick View Logic */
+                }}
                 className="p-2 bg-white dark:bg-black/60 text-gray-700 dark:text-gray-200 rounded-full shadow-lg hover:bg-hyundai-blue dark:hover:bg-hyundai-blue hover:text-white dark:hover:text-white transition-colors backdrop-blur-sm"
                 title="Quick View"
               >
@@ -413,20 +414,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {/* 📝 Content Section */}
           <div className="p-4 flex flex-col flex-grow">
             <div className="mb-2">
-               <span className="text-[10px] font-bold tracking-widest text-blue-600 dark:text-blue-400 uppercase bg-blue-50 dark:bg-blue-500/10 px-2 py-1 rounded">
-                 {product.category || 'Spare Part'}
-               </span>
+              <span className="text-[10px] font-bold tracking-widest text-blue-600 dark:text-blue-400 uppercase bg-blue-50 dark:bg-blue-500/10 px-2 py-1 rounded">
+                {product.category || "Spare Part"}
+              </span>
             </div>
 
             <h3 className="font-semibold text-gray-900 dark:text-white text-base line-clamp-2 mb-2 group-hover:text-hyundai-blue transition-colors">
               {product.name}
             </h3>
-            
+
             <div className="mt-auto pt-2 flex items-end justify-between">
               <div className="flex flex-col">
-                 {product.discountPrice ? (
+                {product.discountPrice ? (
                   <div className="flex flex-col">
-                    <span className="text-xs text-gray-400 line-through">₹{product.price.toLocaleString()}</span>
+                    <span className="text-xs text-gray-400 line-through">
+                      ₹{product.price.toLocaleString()}
+                    </span>
                     <span className="text-xl font-bold text-gray-900 dark:text-white">
                       ₹{product.discountPrice.toLocaleString()}
                     </span>
@@ -445,13 +448,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               onClick={handleAddToCart}
               disabled={product.stock <= 0}
               className={`mt-4 w-full py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-all shadow-md hover:shadow-lg
-                ${product.stock <= 0 
-                  ? 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-hyundai-blue to-blue-600 text-white shadow-blue-500/25 hover:shadow-blue-500/40'
+                ${
+                  product.stock <= 0
+                    ? "bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-hyundai-blue to-blue-600 text-white shadow-blue-500/25 hover:shadow-blue-500/40"
                 }`}
             >
               {product.stock <= 0 ? (
-                'Out of Stock'
+                "Out of Stock"
               ) : (
                 <>
                   <ShoppingCart size={16} />

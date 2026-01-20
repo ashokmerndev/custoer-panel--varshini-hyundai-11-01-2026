@@ -1,29 +1,29 @@
 // src/app/orders/success/page.tsx
-'use client';
+"use client";
 
-import { useEffect, useState, Suspense } from 'react';
-import { motion } from 'framer-motion';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from "react";
+import { motion } from "framer-motion";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   CheckCircle,
   Package,
   ArrowRight,
   Home,
   Sparkles,
-  Loader2
-} from 'lucide-react';
-import Confetti from 'react-confetti';
-import apiClient from '@/services/apiClient'; // 👈 Import API Client
+  Loader2,
+} from "lucide-react";
+import Confetti from "react-confetti";
+import apiClient from "@/services/apiClient"; // 👈 Import API Client
 
 // Component using SearchParams needs to be wrapped or separated
 function SuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const orderId = searchParams.get('orderId');
-  console.log(orderId)
+  const orderId = searchParams.get("orderId");
+  console.log(orderId);
   const [showConfetti, setShowConfetti] = useState(true);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-  
+
   // New State for Order Details
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -51,8 +51,9 @@ function SuccessContent() {
     try {
       // 🔗 Backend Link: GET /api/orders/:id
       const response = await apiClient.get(`/orders/${id}`);
+      console.log("ashok", response);
       if (response.data.success) {
-        setOrderDetails(response.data.data);
+        setOrderDetails(response.data.data.order);
       }
     } catch (error) {
       console.error("Failed to fetch order details", error);
@@ -71,7 +72,7 @@ function SuccessContent() {
             height={windowSize.height}
             recycle={false}
             numberOfPieces={500}
-            colors={['#00AAD2', '#002C5F', '#D4AF37', '#00F0FF', '#C0C0C0']}
+            colors={["#00AAD2", "#002C5F", "#D4AF37", "#00F0FF", "#C0C0C0"]}
           />
         </div>
       )}
@@ -82,7 +83,7 @@ function SuccessContent() {
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{
-            type: 'spring',
+            type: "spring",
             stiffness: 200,
             damping: 15,
             delay: 0.2,
@@ -97,7 +98,7 @@ function SuccessContent() {
             transition={{
               duration: 3,
               repeat: Infinity,
-              ease: 'easeInOut',
+              ease: "easeInOut",
             }}
             className="rounded-full bg-green-500/20 p-6 ring-4 ring-green-500/10"
           >
@@ -134,42 +135,59 @@ function SuccessContent() {
                   <Package className="text-hyundai-blue" size={24} />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs text-gray-400 uppercase tracking-wider">Order ID</p>
-                  <p className="font-mono text-white font-medium">{orderId}</p>
+                  <p className="text-xs text-gray-400 uppercase tracking-wider">
+                    Order ID
+                  </p>
+                  <p className="font-mono text-white font-medium">
+                    {orderDetails?.orderNumber || orderId}
+                  </p>
                 </div>
               </div>
             </div>
 
             {loading ? (
-               <div className="flex justify-center py-4">
-                 <Loader2 className="animate-spin text-hyundai-blue" />
-               </div>
+              <div className="flex justify-center py-4">
+                <Loader2 className="animate-spin text-hyundai-blue" />
+              </div>
             ) : orderDetails ? (
               // Show actual details if fetched
               <div className="space-y-3 text-left">
-                 <div className="flex justify-between items-center text-sm mb-2">
-                    <span className="text-gray-400">Total Amount:</span>
-                    <span className="text-xl font-bold text-white">₹{orderDetails.totalAmount?.toLocaleString()}</span>
-                 </div>
-                 <div className="flex justify-between items-center text-sm mb-2">
-                    <span className="text-gray-400">Items:</span>
-                    <span className="text-white">{orderDetails.items?.length} items</span>
-                 </div>
-                 <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-400">Payment:</span>
-                    <span className="text-green-400 font-medium">{orderDetails.paymentMethod}</span>
-                 </div>
+                <div className="flex justify-between items-center text-sm mb-2">
+                  <span className="text-gray-400">Total Amount:</span>
+                  <span className="text-xl font-bold text-white">
+                    ₹{orderDetails.totalAmount?.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm mb-2">
+                  <span className="text-gray-400">Items:</span>
+                  <span className="text-white">
+                    {orderDetails.items?.length} items
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400">Payment:</span>
+                  <span className="text-green-400 font-medium">
+                    {orderDetails.paymentMethod}
+                  </span>
+                </div>
               </div>
             ) : (
               // Fallback static text
               <div className="space-y-3 text-left">
                 <div className="flex items-center gap-3 text-gray-300 bg-black/20 p-3 rounded-lg">
-                  <Sparkles size={18} className="text-yellow-400 flex-shrink-0" />
-                  <p className="text-sm">You'll receive a confirmation email shortly</p>
+                  <Sparkles
+                    size={18}
+                    className="text-yellow-400 flex-shrink-0"
+                  />
+                  <p className="text-sm">
+                    You'll receive a confirmation email shortly
+                  </p>
                 </div>
                 <div className="flex items-center gap-3 text-gray-300 bg-black/20 p-3 rounded-lg">
                   <Package size={18} className="text-blue-400 flex-shrink-0" />
-                  <p className="text-sm">Track your order status in real-time</p>
+                  <p className="text-sm">
+                    Track your order status in real-time
+                  </p>
                 </div>
               </div>
             )}
@@ -186,7 +204,7 @@ function SuccessContent() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => router.push('/orders')}
+            onClick={() => router.push("/orders")}
             className="px-8 py-3.5 bg-gradient-to-r from-hyundai-blue to-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all"
           >
             <Package size={20} />
@@ -197,7 +215,7 @@ function SuccessContent() {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => router.push('/')}
+            onClick={() => router.push("/")}
             className="px-8 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl font-semibold hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
           >
             <Home size={20} />
@@ -215,11 +233,13 @@ function SuccessContent() {
 
 export default function OrderSuccessPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#050B14] flex items-center justify-center pt-24 text-white">
-        <div className="w-8 h-8 border-2 border-hyundai-blue border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#050B14] flex items-center justify-center pt-24 text-white">
+          <div className="w-8 h-8 border-2 border-hyundai-blue border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
       <SuccessContent />
     </Suspense>
   );
