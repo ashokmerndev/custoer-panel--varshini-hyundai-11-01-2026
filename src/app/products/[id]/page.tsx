@@ -73,7 +73,7 @@
 //     try {
 //       setLoading(true);
 //       const response = await apiClient.get(`/products/${params.id}`);
-      
+
 //       if (response.data.success) {
 //         // 🔍 CRITICAL FIX: Accessing data.product correctly
 //         // Backend returns: { data: { product: { ... } } }
@@ -90,7 +90,7 @@
 
 //   const handleAddToCart = async () => {
 //     if (!product) return;
-    
+
 //     setAddingToCart(true);
 //     try {
 //       const response = await apiClient.post('/cart/add', {
@@ -133,12 +133,12 @@
 //   // Ensure price is treated as number and has fallback
 //   const price = Number(product.price) || 0;
 //   const discountPrice = Number(product.discountPrice) || 0;
-  
+
 //   const currentPrice = discountPrice > 0 ? discountPrice : price;
 //   const hasDiscount = discountPrice > 0 && discountPrice < price;
 //   const savings = hasDiscount ? price - discountPrice : 0;
-//   const discountPercentage = hasDiscount 
-//     ? Math.round((savings / price) * 100) 
+//   const discountPercentage = hasDiscount
+//     ? Math.round((savings / price) * 100)
 //     : 0;
 
 //   const isLowStock = product.stock < 5 && product.stock > 0;
@@ -333,7 +333,7 @@
 //                 {product.compatibleModels.map((model, index) => {
 //                   // Handle both Object and String types safely
 //                   const modelName = typeof model === 'string' ? model : model.modelName;
-                  
+
 //                   return (
 //                     <motion.span
 //                       key={index}
@@ -527,28 +527,13 @@
 //   );
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // src/app/products/[id]/page.tsx
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
 import {
   ShoppingCart,
   Heart,
@@ -558,11 +543,11 @@ import {
   ArrowLeft,
   AlertTriangle,
   Check,
-  Image as ImageIcon
-} from 'lucide-react';
-import apiClient from '@/services/apiClient';
-import { useStore } from '@/store/useStore';
-import toast from 'react-hot-toast';
+  Image as ImageIcon,
+} from "lucide-react";
+import apiClient from "@/services/apiClient";
+import { useStore } from "@/store/useStore";
+import toast from "react-hot-toast";
 
 // 🛠️ Interfaces matching Backend Data
 interface ProductImage {
@@ -615,14 +600,14 @@ export default function ProductDetailsPage() {
     try {
       setLoading(true);
       const response = await apiClient.get(`/products/${params.id}`);
-      
+
       if (response.data.success) {
         const productData = response.data.data.product || response.data.data;
         setProduct(productData);
       }
     } catch (error: any) {
-      console.error('Error fetching product:', error);
-      toast.error('Failed to load product');
+      console.error("Error fetching product:", error);
+      toast.error("Failed to load product");
     } finally {
       setLoading(false);
     }
@@ -630,21 +615,21 @@ export default function ProductDetailsPage() {
 
   const handleAddToCart = async () => {
     if (!product) return;
-    
+
     setAddingToCart(true);
     try {
-      const response = await apiClient.post('/cart/add', {
+      const response = await apiClient.post("/cart/add", {
         productId: product._id,
         quantity,
       });
 
       if (response.data.success) {
         setCart(response.data.data.cart);
-        toast.success('Added to cart!');
+        toast.success("Added to cart!");
         toggleCartDrawer();
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to add to cart');
+      toast.error(error.response?.data?.error || "Failed to add to cart");
     } finally {
       setAddingToCart(false);
     }
@@ -672,12 +657,12 @@ export default function ProductDetailsPage() {
   // 🛡️ SAFETY CALCULATIONS
   const price = Number(product.price) || 0;
   const discountPrice = Number(product.discountPrice) || 0;
-  
+
   const currentPrice = discountPrice > 0 ? discountPrice : price;
   const hasDiscount = discountPrice > 0 && discountPrice < price;
   const savings = hasDiscount ? price - discountPrice : 0;
-  const discountPercentage = hasDiscount 
-    ? Math.round((savings / price) * 100) 
+  const discountPercentage = hasDiscount
+    ? Math.round((savings / price) * 100)
     : 0;
 
   const isLowStock = product.stock < 5 && product.stock > 0;
@@ -686,7 +671,6 @@ export default function ProductDetailsPage() {
   return (
     // 👇 Main Container with Theme Transition
     <div className="min-h-screen bg-gray-50 dark:bg-[#050B14] text-gray-900 dark:text-white p-4 md:p-8 pt-24 md:pt-32 transition-colors duration-300">
-      
       {/* Back button */}
       <motion.button
         initial={{ opacity: 0, x: -20 }}
@@ -707,42 +691,44 @@ export default function ProductDetailsPage() {
           className="space-y-4"
         >
           {/* Main Image */}
-          <div className="relative aspect-square w-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl overflow-hidden shadow-lg dark:shadow-2xl flex items-center justify-center p-8">
+          <div className="group relative aspect-square w-full bg-gray-50 dark:bg-[#1a1d29] border border-gray-200 dark:border-white/10 rounded-3xl overflow-hidden shadow-sm dark:shadow-none flex items-center justify-center">
+            {/* Modern Floating Discount Badge */}
+            {hasDiscount && (
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="absolute top-4 right-4 z-20"
+              >
+                <div className="bg-yellow-400 text-black text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-full shadow-lg shadow-yellow-400/20 tracking-wide">
+                  -{discountPercentage}% OFF
+                </div>
+              </motion.div>
+            )}
+
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedImage}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-                className="relative w-full h-full"
+                initial={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="relative w-full h-full p-6 sm:p-8" // ✨ Perfect Padding for centering
               >
                 {product.images && product.images.length > 0 ? (
                   <Image
-                    src={product.images[selectedImage]?.url || ''}
+                    src={product.images[selectedImage]?.url || ""}
                     alt={product.name}
                     fill
-                    className="object-contain"
+                    // ✨ Magic Class: object-contain keeps ratio, drop-shadow adds depth, hover adds life
+                    className="object-contain drop-shadow-xl transition-transform duration-700 ease-in-out group-hover:scale-110"
                     priority
                     unoptimized={true}
                   />
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600">
-                    <ImageIcon size={64} className="mb-4" />
-                    <p>No image available</p>
+                  <div className="flex flex-col items-center justify-center h-full text-gray-300 dark:text-gray-700">
+                    <ImageIcon size={64} className="mb-2 opacity-50" />
+                    <p className="text-xs font-medium">No Image</p>
                   </div>
-                )}
-
-                {/* Discount badge */}
-                {hasDiscount && (
-                  <motion.div
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-                    className="absolute top-0 right-0 bg-yellow-400 text-black font-bold px-4 py-2 rounded-bl-2xl shadow-md z-10"
-                  >
-                    -{discountPercentage}% OFF
-                  </motion.div>
                 )}
               </motion.div>
             </AnimatePresence>
@@ -763,9 +749,9 @@ export default function ProductDetailsPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedImage(index)}
                   className={`relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
-                    selectedImage === index 
-                      ? 'border-hyundai-blue shadow-lg shadow-hyundai-blue/20' 
-                      : 'border-gray-200 dark:border-white/10 opacity-70 hover:opacity-100'
+                    selectedImage === index
+                      ? "border-hyundai-blue shadow-lg shadow-hyundai-blue/20"
+                      : "border-gray-200 dark:border-white/10 opacity-70 hover:opacity-100"
                   }`}
                 >
                   <Image
@@ -795,7 +781,7 @@ export default function ProductDetailsPage() {
             transition={{ delay: 0.3 }}
             className="text-sm font-mono text-gray-500 dark:text-gray-400 mb-2"
           >
-            Part #{product.partNumber || 'N/A'}
+            Part #{product.partNumber || "N/A"}
           </motion.div>
 
           {/* Product Name */}
@@ -832,7 +818,9 @@ export default function ProductDetailsPage() {
             </div>
             {hasDiscount && (
               <div className="flex flex-col mb-1">
-                <div className="text-lg text-gray-400 line-through">₹{price.toLocaleString()}</div>
+                <div className="text-lg text-gray-400 line-through">
+                  ₹{price.toLocaleString()}
+                </div>
                 <div className="text-sm text-green-600 dark:text-green-400 font-medium">
                   Save ₹{savings.toLocaleString()}
                 </div>
@@ -855,12 +843,16 @@ export default function ProductDetailsPage() {
             ) : isLowStock ? (
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20 rounded-lg">
                 <AlertTriangle size={18} />
-                <span className="font-semibold">Only {product.stock} left in stock!</span>
+                <span className="font-semibold">
+                  Only {product.stock} left in stock!
+                </span>
               </div>
             ) : (
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400 border border-green-200 dark:border-green-500/20 rounded-lg">
                 <Check size={18} />
-                <span className="font-semibold">In Stock ({product.stock} available)</span>
+                <span className="font-semibold">
+                  In Stock ({product.stock} available)
+                </span>
               </div>
             )}
           </motion.div>
@@ -876,7 +868,8 @@ export default function ProductDetailsPage() {
               <h3 className="text-lg font-semibold mb-3">Compatible Models</h3>
               <div className="flex flex-wrap gap-2">
                 {product.compatibleModels.map((model, index) => {
-                  const modelName = typeof model === 'string' ? model : model.modelName;
+                  const modelName =
+                    typeof model === "string" ? model : model.modelName;
                   return (
                     <span
                       key={index}
@@ -898,31 +891,40 @@ export default function ProductDetailsPage() {
             className="mb-8"
           >
             <h3 className="text-lg font-semibold mb-3">Description</h3>
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{product.description}</p>
+            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+              {product.description}
+            </p>
           </motion.div>
 
           {/* Specifications */}
-          {product.specifications && Object.keys(product.specifications).length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.0 }}
-              className="mb-8"
-            >
-              <h3 className="text-lg font-semibold mb-3">Specifications</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {Object.entries(product.specifications).map(([key, value], index) => (
-                  <div
-                    key={key}
-                    className="flex justify-between items-center p-3 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/5"
-                  >
-                    <span className="text-gray-500 dark:text-gray-400 text-sm">{key}</span>
-                    <span className="text-gray-900 dark:text-white font-medium text-sm">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
+          {product.specifications &&
+            Object.keys(product.specifications).length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.0 }}
+                className="mb-8"
+              >
+                <h3 className="text-lg font-semibold mb-3">Specifications</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {Object.entries(product.specifications).map(
+                    ([key, value], index) => (
+                      <div
+                        key={key}
+                        className="flex justify-between items-center p-3 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/5"
+                      >
+                        <span className="text-gray-500 dark:text-gray-400 text-sm">
+                          {key}
+                        </span>
+                        <span className="text-gray-900 dark:text-white font-medium text-sm">
+                          {value}
+                        </span>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </motion.div>
+            )}
 
           {/* Warranty */}
           {product.warrantyPeriod && (
@@ -933,7 +935,9 @@ export default function ProductDetailsPage() {
               className="flex items-center gap-2 text-gray-600 dark:text-gray-300 mb-8 p-4 bg-blue-50 dark:bg-hyundai-blue/10 rounded-xl border border-blue-100 dark:border-hyundai-blue/20"
             >
               <Shield className="text-hyundai-blue" size={20} />
-              <span className="font-medium">{product.warrantyPeriod} Warranty</span>
+              <span className="font-medium">
+                {product.warrantyPeriod} Warranty
+              </span>
             </motion.div>
           )}
 
@@ -982,7 +986,7 @@ export default function ProductDetailsPage() {
                   ) : (
                     <>
                       <ShoppingCart size={20} />
-                      {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                      {isOutOfStock ? "Out of Stock" : "Add to Cart"}
                     </>
                   )}
                 </button>
@@ -1011,7 +1015,9 @@ export default function ProductDetailsPage() {
               </div>
               <div>
                 <div className="font-bold text-sm">Free Shipping</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">On orders above ₹5000</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  On orders above ₹5000
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -1020,7 +1026,9 @@ export default function ProductDetailsPage() {
               </div>
               <div>
                 <div className="font-bold text-sm">Genuine Parts</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">100% Original</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  100% Original
+                </div>
               </div>
             </div>
           </motion.div>
@@ -1039,7 +1047,10 @@ function LoadingSkeleton() {
           <div className="aspect-square bg-gray-200 dark:bg-white/5 rounded-3xl animate-pulse" />
           <div className="flex gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="w-20 h-20 bg-gray-200 dark:bg-white/5 rounded-xl animate-pulse" />
+              <div
+                key={i}
+                className="w-20 h-20 bg-gray-200 dark:bg-white/5 rounded-xl animate-pulse"
+              />
             ))}
           </div>
         </div>

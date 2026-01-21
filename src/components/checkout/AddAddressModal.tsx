@@ -1,12 +1,19 @@
-// src/components/checkout/AddAddressModal.tsx
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { X, MapPin } from 'lucide-react';
-import apiClient from '@/services/apiClient';
-import toast from 'react-hot-toast';
-import styles from './AddAddressModal.module.css';
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  X,
+  MapPin,
+  Building,
+  Hash,
+  Navigation,
+  Briefcase,
+  Home,
+  User,
+} from "lucide-react";
+import apiClient from "@/services/apiClient";
+import toast from "react-hot-toast";
 
 interface AddAddressModalProps {
   onClose: () => void;
@@ -21,55 +28,60 @@ interface AddressFormData {
   pincode: string;
 }
 
-export const AddAddressModal: React.FC<AddAddressModalProps> = ({ onClose, onSuccess }) => {
+export const AddAddressModal: React.FC<AddAddressModalProps> = ({
+  onClose,
+  onSuccess,
+}) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<AddressFormData>({
-    addressType: 'Home',
-    street: '',
-    city: '',
-    state: '',
-    pincode: '',
+    addressType: "Home",
+    street: "",
+    city: "",
+    state: "",
+    pincode: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
+  const setAddressType = (type: string) => {
+    setFormData({ ...formData, addressType: type });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
-    if (!formData.street.trim()) {
-      toast.error('Please enter street address');
-      return;
-    }
-    if (!formData.city.trim()) {
-      toast.error('Please enter city');
-      return;
-    }
-    if (!formData.state.trim()) {
-      toast.error('Please enter state');
+    // Basic Validation
+    if (
+      !formData.street.trim() ||
+      !formData.city.trim() ||
+      !formData.state.trim()
+    ) {
+      toast.error("Please fill in all required fields");
       return;
     }
     if (!formData.pincode.trim() || formData.pincode.length !== 6) {
-      toast.error('Please enter valid 6-digit pincode');
+      toast.error("Please enter a valid 6-digit pincode");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await apiClient.post('/auth/address', formData);
-
+      const response = await apiClient.post("/auth/address", formData);
       if (response.data.success) {
+        toast.success("Address added successfully!");
         onSuccess();
+        onClose();
       }
     } catch (error: any) {
-      console.error('Error adding address:', error);
-      const errorMessage = error.response?.data?.error || 'Failed to add address';
+      console.error("Error adding address:", error);
+      const errorMessage =
+        error.response?.data?.error || "Failed to add address";
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -77,143 +89,170 @@ export const AddAddressModal: React.FC<AddAddressModalProps> = ({ onClose, onSuc
   };
 
   return (
-    <>
-      {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className={styles.backdrop}
-      />
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* 1. Backdrop with Blur */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        />
 
-      {/* Modal */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 50 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 50 }}
-        transition={{ type: 'spring', damping: 25 }}
-        className={styles.modal}
-      >
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <MapPin className="text-hyundai-blue" size={24} />
-            <h3 className={styles.title}>Add Delivery Address</h3>
-          </div>
-          <button onClick={onClose} className={styles.closeButton}>
-            <X size={24} />
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Address Type */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Address Type</label>
-            <select
-              name="addressType"
-              value={formData.addressType}
-              onChange={handleChange}
-              className={styles.select}
-            >
-              <option value="Home">Home</option>
-              <option value="Work">Work</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          {/* Street Address */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>
-              Street Address <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="street"
-              value={formData.street}
-              onChange={handleChange}
-              placeholder="123 Main Street, Apartment 4B"
-              className={styles.input}
-              required
-            />
-          </div>
-
-          {/* City and State */}
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>
-                City <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                placeholder="Mumbai"
-                className={styles.input}
-                required
-              />
+        {/* 2. Main Modal Container */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="relative w-full max-w-lg bg-white dark:bg-[#1a1d29] rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-white/10"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-500/20 rounded-full text-blue-600 dark:text-blue-400">
+                <MapPin size={20} />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                New Delivery Address
+              </h3>
             </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.label}>
-                State <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-                placeholder="Maharashtra"
-                className={styles.input}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Pincode */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>
-              PIN Code <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="pincode"
-              value={formData.pincode}
-              onChange={handleChange}
-              placeholder="400001"
-              maxLength={6}
-              pattern="[0-9]{6}"
-              className={styles.input}
-              required
-            />
-          </div>
-
-          {/* Submit Button */}
-          <div className={styles.actions}>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="button"
+            <button
               onClick={onClose}
-              className={styles.cancelButton}
+              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-colors"
             >
-              Cancel
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: loading ? 1 : 1.02 }}
-              whileTap={{ scale: loading ? 1 : 0.98 }}
-              type="submit"
-              disabled={loading}
-              className={styles.submitButton}
-            >
-              {loading ? 'Adding...' : 'Add Address'}
-            </motion.button>
+              <X size={20} />
+            </button>
           </div>
-        </form>
-      </motion.div>
-    </>
+
+          {/* Form Content */}
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* Address Type Selector (Chips) */}
+            <div className="space-y-3">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Address Type
+              </label>
+              <div className="flex gap-3">
+                {["Home", "Work", "Other"].map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setAddressType(type)}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
+                      formData.addressType === type
+                        ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/30"
+                        : "bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10"
+                    }`}
+                  >
+                    {type === "Home" && <Home size={16} />}
+                    {type === "Work" && <Briefcase size={16} />}
+                    {type === "Other" && <Navigation size={16} />}
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Inputs Grid */}
+            <div className="space-y-4">
+              {/* Street Address */}
+              <div className="relative group">
+                <Building
+                  className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors"
+                  size={18}
+                />
+                <input
+                  type="text"
+                  name="street"
+                  value={formData.street}
+                  onChange={handleChange}
+                  placeholder="Flat No, Building, Street Area"
+                  className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                  required
+                />
+              </div>
+
+              {/* City & State Row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative group">
+                  <MapPin
+                    className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors"
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    placeholder="City"
+                    className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                    required
+                  />
+                </div>
+                <div className="relative group">
+                  <Navigation
+                    className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors"
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleChange}
+                    placeholder="State"
+                    className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Pincode */}
+              <div className="relative group">
+                <Hash
+                  className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors"
+                  size={18}
+                />
+                <input
+                  type="text"
+                  name="pincode"
+                  value={formData.pincode}
+                  onChange={handleChange}
+                  placeholder="6-Digit PIN Code"
+                  maxLength={6}
+                  className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="pt-2 flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-3.5 rounded-xl border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 py-3.5 rounded-xl bg-blue-600 text-white font-semibold shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Address"
+                )}
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      </div>
+    </AnimatePresence>
   );
 };

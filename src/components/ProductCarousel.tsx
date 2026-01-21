@@ -12,7 +12,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-// 👇 1. Interface Definition (To fix TypeScript errors)
+// Interfaces
 interface ProductImage {
   url: string;
 }
@@ -28,7 +28,6 @@ interface Product {
 }
 
 const ProductCarousel = () => {
-  // 👇 2. Adding Type to State
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,8 +35,6 @@ const ProductCarousel = () => {
     const fetchProducts = async () => {
       try {
         const response = await apiClient.get("/products/featured");
-
-        // 👇 Optional Chaining & Type Safety
         if (response.data?.success && response.data?.data?.products) {
           setProducts(response.data.data.products);
         }
@@ -51,7 +48,6 @@ const ProductCarousel = () => {
     fetchProducts();
   }, []);
 
-  // 👇 3. Typing the argument
   const getImageUrl = (product: Product) => {
     if (product.images && product.images.length > 0) {
       return product.images[0].url;
@@ -59,60 +55,82 @@ const ProductCarousel = () => {
     return "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=400&auto=format&fit=crop";
   };
 
-  if (loading) return null;
+  if (loading) return null; // Or a skeleton loader
   if (products.length === 0) return null;
 
   return (
-    <div className="w-full py-10 bg-[#0f111a]">
-      <div className="max-w-7xl mx-auto px-4">
+    // ✨ Container: Light mode (gray-50) & Dark mode (dark bg)
+    <section className="w-full py-12 bg-gray-50 dark:bg-[#0f111a] transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Title Section */}
-        <div className="flex justify-between items-end mb-6">
-          <div>
-            <h2 className="text-3xl font-bold text-white mb-2">
+        {/* Title Section - Mobile Optimized */}
+        <div className="flex flex-row items-center justify-between mb-6 sm:mb-8 px-1 sm:px-0">
+          {/* Left Side: Text */}
+          <div className="flex flex-col gap-0.5 sm:gap-1">
+            <h2 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
               Featured Products
             </h2>
-            <p className="text-gray-400">Top picks for your Hyundai</p>
+            <p className="text-xs sm:text-base text-gray-500 dark:text-gray-400 font-medium">
+              Top picks for your Hyundai
+            </p>
           </div>
+
+          {/* Right Side: Button */}
           <Link
             href="/products"
-            className="text-blue-500 hover:text-blue-400 font-medium text-sm"
+            className="group flex items-center gap-1 text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full transition-all hover:bg-blue-100 dark:hover:bg-blue-500/20 active:scale-95"
           >
-            View All &rarr;
+            <span>View All</span>
+            {/* Arrow Icon with Animation */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-3 h-3 sm:w-4 sm:h-4 transform group-hover:translate-x-1 transition-transform"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
           </Link>
         </div>
 
         {/* Swiper Slider */}
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
-          spaceBetween={24}
-          slidesPerView={1}
+          spaceBetween={20}
+          slidesPerView={1.2} // Mobile లో పక్కన కార్డ్ కొంచెం కనిపించేలా (Intuitive scroll)
           navigation
           autoplay={{ delay: 3000, disableOnInteraction: false }}
-          pagination={{ clickable: true }}
+          pagination={{ clickable: true, dynamicBullets: true }}
           breakpoints={{
-            640: { slidesPerView: 2 },
-            768: { slidesPerView: 3 },
-            1024: { slidesPerView: 4 },
+            640: { slidesPerView: 2, spaceBetween: 24 },
+            768: { slidesPerView: 3, spaceBetween: 24 },
+            1024: { slidesPerView: 4, spaceBetween: 24 },
           }}
-          className="pb-12"
+          className="pb-14 !px-1" // Extra padding for shadow visibility
         >
           {products.map((product) => (
-            <SwiperSlide key={product._id}>
+            <SwiperSlide key={product._id} className="h-auto">
               <Link href={`/products/${product._id}`} className="block h-full">
-                <div className="bg-[#1a1d29] border border-gray-800 rounded-xl overflow-hidden hover:border-blue-500 transition-all duration-300 group h-full flex flex-col">
+                {/* ✨ Card: White bg for Light mode, Dark bg for Dark mode */}
+                <div className="h-full flex flex-col bg-white dark:bg-[#1a1d29] border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:shadow-xl hover:border-blue-500/50 dark:hover:border-blue-500 transition-all duration-300 group">
                   {/* Image Area */}
-                  <div className="relative h-48 w-full bg-white/5 flex items-center justify-center overflow-hidden">
+                  <div className="relative h-48 sm:h-52 w-full bg-gray-100 dark:bg-white/5 flex items-center justify-center overflow-hidden">
                     <Image
                       src={getImageUrl(product)}
                       alt={product.name}
                       fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
                       unoptimized={true}
                     />
 
                     {/* Stock Badge */}
                     {product.stock <= 0 && (
-                      <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded">
+                      <div className="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-md">
                         OUT OF STOCK
                       </div>
                     )}
@@ -120,37 +138,37 @@ const ProductCarousel = () => {
 
                   {/* Content Area */}
                   <div className="p-4 flex flex-col flex-grow">
-                    <p className="text-xs text-blue-400 font-semibold mb-1 uppercase tracking-wider">
+                    <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1 uppercase tracking-wider">
                       {product.category}
                     </p>
 
                     <h3
-                      className="text-white font-medium text-lg truncate mb-2"
+                      className="text-gray-900 dark:text-white font-semibold text-base sm:text-lg leading-tight truncate mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
                       title={product.name}
                     >
                       {product.name}
                     </h3>
 
-                    <div className="flex items-center justify-between mt-auto pt-2">
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100 dark:border-white/10">
                       <div className="flex flex-col">
                         {/* Discount Logic */}
                         {product.price > product.finalPrice ? (
                           <>
-                            <span className="text-xs text-gray-400 line-through">
+                            <span className="text-xs text-gray-500 dark:text-gray-400 line-through">
                               ₹{product.price.toLocaleString()}
                             </span>
-                            <span className="text-xl font-bold text-white">
+                            <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                               ₹{product.finalPrice.toLocaleString()}
                             </span>
                           </>
                         ) : (
-                          <span className="text-xl font-bold text-white">
+                          <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                             ₹{product.finalPrice.toLocaleString()}
                           </span>
                         )}
                       </div>
 
-                      <button className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors shadow-lg shadow-blue-900/20">
+                      <button className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/30 active:scale-95">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="20"
@@ -175,7 +193,7 @@ const ProductCarousel = () => {
           ))}
         </Swiper>
       </div>
-    </div>
+    </section>
   );
 };
 
