@@ -1,11 +1,11 @@
 // src/app/orders/page.tsx
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Package,
   Truck,
@@ -16,18 +16,18 @@ import {
   Clock,
   MapPin,
   CreditCard,
-  AlertCircle
-} from 'lucide-react';
-import apiClient from '@/services/apiClient';
-import socketService from '@/services/socketService';
-import toast from 'react-hot-toast';
+  AlertCircle,
+} from "lucide-react";
+import apiClient from "@/services/apiClient";
+import socketService from "@/services/socketService";
+import toast from "react-hot-toast";
 
 // Helper to fix image URLs
 const getImageUrl = (imagePath: string | undefined) => {
   if (!imagePath) return null;
-  if (imagePath.startsWith('http')) return imagePath;
-  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || '';
+  if (imagePath.startsWith("http")) return imagePath;
+  const cleanPath = imagePath.startsWith("/") ? imagePath.slice(1) : imagePath;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "";
   return `${baseUrl}/${cleanPath}`;
 };
 
@@ -51,8 +51,8 @@ interface Order {
   orderNumber: string;
   items: OrderItem[];
   totalAmount: number;
-  orderStatus: 'Placed' | 'Packed' | 'Shipped' | 'Delivered' | 'Cancelled';
-  paymentStatus: 'Pending' | 'Completed' | 'Failed';
+  orderStatus: "Placed" | "Packed" | "Shipped" | "Delivered" | "Cancelled";
+  paymentStatus: "Pending" | "Completed" | "Failed";
   paymentMethod: string;
   shippingAddress: {
     street: string;
@@ -72,7 +72,7 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
@@ -89,17 +89,17 @@ export default function OrdersPage() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/orders');
-      
+      const response = await apiClient.get("/orders");
+
       if (response.data.success) {
-        const ordersData = Array.isArray(response.data.data) 
-          ? response.data.data 
-          : (response.data.orders || []);
-        
+        const ordersData = Array.isArray(response.data.data)
+          ? response.data.data
+          : response.data.orders || [];
+
         setOrders(ordersData);
       }
     } catch (error: any) {
-      console.error('Error fetching orders:', error);
+      console.error("Error fetching orders:", error);
     } finally {
       setLoading(false);
     }
@@ -107,43 +107,54 @@ export default function OrdersPage() {
 
   const setupSocketListeners = () => {
     if (socketService.onOrderStatusUpdated) {
-        socketService.onOrderStatusUpdated((data: any) => {
-            console.log('Order status updated:', data);
-            toast.success(`Order ${data.orderNumber} status: ${data.orderStatus}`);
-            fetchOrders(); 
-        });
+      socketService.onOrderStatusUpdated((data: any) => {
+        console.log("Order status updated:", data);
+        toast.success(`Order ${data.orderNumber} status: ${data.orderStatus}`);
+        fetchOrders();
+      });
     }
   };
 
-  const handleDownloadInvoice = async (orderId: string, orderNumber: string) => {
+  const handleDownloadInvoice = async (
+    orderId: string,
+    orderNumber: string,
+  ) => {
     try {
       const response = await apiClient.get(`/orders/${orderId}/invoice`, {
-        responseType: 'blob',
+        responseType: "blob",
       });
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', `invoice-${orderNumber}.pdf`);
+      link.setAttribute("download", `invoice-${orderNumber}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      
-      toast.success('Invoice downloaded successfully');
+
+      toast.success("Invoice downloaded successfully");
     } catch (error: any) {
-      toast.error('Failed to download invoice');
+      toast.error("Failed to download invoice");
     }
   };
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      Placed: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:border-yellow-500/30',
-      Packed: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30',
-      Shipped: 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-400 dark:border-indigo-500/30',
-      Delivered: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30',
-      Cancelled: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30',
+      Placed:
+        "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:border-yellow-500/30",
+      Packed:
+        "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30",
+      Shipped:
+        "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-400 dark:border-indigo-500/30",
+      Delivered:
+        "bg-green-100 text-green-800 border-green-200 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30",
+      Cancelled:
+        "bg-red-100 text-red-800 border-red-200 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30",
     };
-    return colors[status] || 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-500/20 dark:text-gray-400';
+    return (
+      colors[status] ||
+      "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-500/20 dark:text-gray-400"
+    );
   };
 
   const getStatusIcon = (status: string) => {
@@ -191,17 +202,20 @@ export default function OrdersPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center justify-center py-20 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm dark:shadow-none"
+              className="flex flex-col items-center justify-center py-20 bg-white dark:bg-[#FFFFFF0D] border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm dark:shadow-none"
             >
               <div className="text-6xl mb-4">📦</div>
-              <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">No orders yet</h3>
+              <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+                No orders yet
+              </h3>
               <p className="text-gray-500 dark:text-gray-400 mb-6 text-center max-w-md">
-                It looks like you haven't placed any orders yet. Start shopping to see your history here.
+                It looks like you haven't placed any orders yet. Start shopping
+                to see your history here.
               </p>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/')}
+                onClick={() => router.push("/")}
                 className="px-6 py-3 bg-gradient-to-r from-hyundai-blue to-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/20 transition-all"
               >
                 Start Shopping
@@ -221,71 +235,93 @@ export default function OrdersPage() {
                   <div className="p-6 border-b border-gray-200 dark:border-white/10 flex flex-col md:flex-row justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">#{order.orderNumber}</h3>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium border flex items-center ${getStatusColor(order.orderStatus)}`}>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                          #{order.orderNumber}
+                        </h3>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium border flex items-center ${getStatusColor(order.orderStatus)}`}
+                        >
                           {getStatusIcon(order.orderStatus)}
                           {order.orderStatus}
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Placed on {new Date(order.createdAt).toLocaleString('en-IN', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
+                        Placed on{" "}
+                        {new Date(order.createdAt).toLocaleString("en-IN", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
                         })}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                          order.paymentStatus === 'Completed' 
-                            ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20' 
-                            : 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20'
-                        }`}>
-                          Payment: {order.paymentStatus}
-                        </span>
-                        <div className="text-right">
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Total Amount</p>
-                            <p className="text-xl font-bold text-gray-900 dark:text-white">₹{order.totalAmount?.toLocaleString()}</p>
-                        </div>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                          order.paymentStatus === "Completed"
+                            ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20"
+                            : "bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/20"
+                        }`}
+                      >
+                        Payment: {order.paymentStatus}
+                      </span>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Total Amount
+                        </p>
+                        <p className="text-xl font-bold text-gray-900 dark:text-white">
+                          ₹{order.totalAmount?.toLocaleString()}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
                   {/* Order Body */}
                   <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    
                     {/* Items Column */}
                     <div className="lg:col-span-2 space-y-4">
                       {order.items?.slice(0, 2).map((item, idx) => {
-                          const imageUrl = getImageUrl(item.image || item.product?.images?.[0]?.url);
-                          const itemName = item.name || item.product?.name || 'Product';
+                        const imageUrl = getImageUrl(
+                          item.image || item.product?.images?.[0]?.url,
+                        );
+                        const itemName =
+                          item.name || item.product?.name || "Product";
 
-                          return (
-                            <div key={idx} className="flex gap-4 items-center bg-gray-50 dark:bg-black/20 p-3 rounded-xl border border-gray-200 dark:border-white/5">
-                              <div className="relative w-16 h-16 bg-white dark:bg-white/5 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100 dark:border-0">
-                                {imageUrl ? (
-                                  <Image 
-                                    src={imageUrl} 
-                                    alt={itemName} 
-                                    fill 
-                                    className="object-cover"
-                                    unoptimized={true}
-                                  />
-                                ) : (
-                                  <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-600">
-                                    <AlertCircle size={20} />
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex-grow">
-                                <p className="font-semibold text-gray-900 dark:text-white line-clamp-1">{itemName}</p>
-                                <div className="flex justify-between items-center mt-1">
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Qty: {item.quantity}</p>
-                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">₹{item.price?.toLocaleString()}</p>
+                        return (
+                          <div
+                            key={idx}
+                            className="flex gap-4 items-center bg-gray-50 dark:bg-black/20 p-3 rounded-xl border border-gray-200 dark:border-white/5"
+                          >
+                            <div className="relative w-16 h-16 bg-white dark:bg-white/5 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100 dark:border-0">
+                              {imageUrl ? (
+                                <Image
+                                  src={imageUrl}
+                                  alt={itemName}
+                                  fill
+                                  className="object-cover"
+                                  unoptimized={true}
+                                />
+                              ) : (
+                                <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-600">
+                                  <AlertCircle size={20} />
                                 </div>
+                              )}
+                            </div>
+                            <div className="flex-grow">
+                              <p className="font-semibold text-gray-900 dark:text-white line-clamp-1">
+                                {itemName}
+                              </p>
+                              <div className="flex justify-between items-center mt-1">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  Qty: {item.quantity}
+                                </p>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  ₹{item.price?.toLocaleString()}
+                                </p>
                               </div>
                             </div>
-                         );
+                          </div>
+                        );
                       })}
                       {order.items?.length > 2 && (
                         <p className="text-sm text-gray-500 dark:text-gray-500 pl-2">
@@ -297,31 +333,51 @@ export default function OrdersPage() {
                     {/* Details Column */}
                     <div className="lg:col-span-1 space-y-4 text-sm">
                       <div className="flex items-start gap-3">
-                        <CreditCard size={16} className="text-hyundai-blue mt-0.5" />
+                        <CreditCard
+                          size={16}
+                          className="text-hyundai-blue mt-0.5"
+                        />
                         <div>
-                          <p className="text-gray-500 dark:text-gray-400 text-xs">Payment Method</p>
-                          <p className="font-medium text-gray-900 dark:text-gray-200 uppercase">{order.paymentMethod}</p>
+                          <p className="text-gray-500 dark:text-gray-400 text-xs">
+                            Payment Method
+                          </p>
+                          <p className="font-medium text-gray-900 dark:text-gray-200 uppercase">
+                            {order.paymentMethod}
+                          </p>
                         </div>
                       </div>
 
                       {order.shippingAddress && (
                         <div className="flex items-start gap-3">
-                            <MapPin size={16} className="text-hyundai-blue mt-0.5" />
-                            <div>
-                            <p className="text-gray-500 dark:text-gray-400 text-xs">Delivery Address</p>
-                            <p className="font-medium text-gray-900 dark:text-gray-200 line-clamp-2">
-                                {order.shippingAddress.street}, {order.shippingAddress.city}
+                          <MapPin
+                            size={16}
+                            className="text-hyundai-blue mt-0.5"
+                          />
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400 text-xs">
+                              Delivery Address
                             </p>
-                            </div>
+                            <p className="font-medium text-gray-900 dark:text-gray-200 line-clamp-2">
+                              {order.shippingAddress.street},{" "}
+                              {order.shippingAddress.city}
+                            </p>
+                          </div>
                         </div>
                       )}
 
                       {order.trackingNumber && (
                         <div className="flex items-start gap-3">
-                          <Truck size={16} className="text-hyundai-blue mt-0.5" />
+                          <Truck
+                            size={16}
+                            className="text-hyundai-blue mt-0.5"
+                          />
                           <div>
-                            <p className="text-gray-500 dark:text-gray-400 text-xs">Tracking Number</p>
-                            <p className="font-mono text-gray-900 dark:text-gray-200">{order.trackingNumber}</p>
+                            <p className="text-gray-500 dark:text-gray-400 text-xs">
+                              Tracking Number
+                            </p>
+                            <p className="font-mono text-gray-900 dark:text-gray-200">
+                              {order.trackingNumber}
+                            </p>
                           </div>
                         </div>
                       )}
@@ -340,11 +396,13 @@ export default function OrdersPage() {
                       View Details
                     </motion.button>
 
-                    {order.paymentStatus === 'Completed' && (
+                    {order.paymentStatus === "Completed" && (
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => handleDownloadInvoice(order._id, order.orderNumber)}
+                        onClick={() =>
+                          handleDownloadInvoice(order._id, order.orderNumber)
+                        }
                         className="px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-hyundai-blue/20 dark:hover:bg-hyundai-blue/30 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                       >
                         <Download size={16} />
@@ -372,7 +430,10 @@ function LoadingSkeleton() {
         </div>
         <div className="space-y-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-64 bg-white dark:bg-white/5 rounded-2xl animate-pulse border border-gray-200 dark:border-white/5" />
+            <div
+              key={i}
+              className="h-64 bg-white dark:bg-white/5 rounded-2xl animate-pulse border border-gray-200 dark:border-white/5"
+            />
           ))}
         </div>
       </div>

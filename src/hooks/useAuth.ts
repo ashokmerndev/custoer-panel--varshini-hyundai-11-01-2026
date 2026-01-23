@@ -320,6 +320,7 @@ import apiClient, {
 } from "@/services/apiClient";
 import socketService from "@/services/socketService";
 import toast from "react-hot-toast";
+import Cookies from "js-cookie";
 
 interface LoginCredentials {
   email: string;
@@ -430,6 +431,10 @@ export const useAuth = () => {
           refreshToken,
         } = response.data.data;
         setAuthTokens(accessToken, refreshToken);
+        Cookies.set("user", userData.id, {
+          expires: 7,
+          sameSite: "strict",
+        });
         setUser(userData);
         socketService.connect();
 

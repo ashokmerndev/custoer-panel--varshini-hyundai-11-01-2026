@@ -8,7 +8,6 @@ import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
-import { usePathname } from "next/navigation";
 
 const reviews = [
   {
@@ -78,30 +77,6 @@ const StarRating = ({ rating }: { rating: number }) => {
 };
 
 const ReviewsCarousel = () => {
-  const pathname = usePathname();
-  const hiddenPrefixes = [
-    "/login",
-    "/register",
-    "/admin", // Admin లోపల ఏ పేజీ అయినా సరే
-    "/orders", // Orders details page కూడా హైడ్ అవుతుంది
-    "/checkout",
-    "/profile",
-    "/forgot-password",
-  ];
-
-  const exactHiddenRoutes = ["/cart", "/wishlist", "/categories", "/success"];
-
-  // Check logic
-  const shouldHide =
-    // 1. Check strict matches
-    exactHiddenRoutes.includes(pathname) ||
-    // 2. Check prefix matches (Ex: /orders/123 will also be hidden)
-    hiddenPrefixes.some((path) => pathname?.startsWith(path));
-
-  if (shouldHide) {
-    return null;
-  }
-
   return (
     <div className="w-full py-16 bg-gray-50 dark:bg-[#0f111a] transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4">

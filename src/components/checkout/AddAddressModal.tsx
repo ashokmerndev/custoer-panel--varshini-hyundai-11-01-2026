@@ -11,6 +11,7 @@ import {
   Briefcase,
   Home,
   User,
+  AlertCircle,
 } from "lucide-react";
 import apiClient from "@/services/apiClient";
 import toast from "react-hot-toast";
@@ -28,6 +29,14 @@ interface AddressFormData {
   pincode: string;
 }
 
+// ఎర్రర్స్ కోసం కొత్త ఇంటర్ఫేస్
+interface AddressFormErrors {
+  street?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+}
+
 export const AddAddressModal: React.FC<AddAddressModalProps> = ({
   onClose,
   onSuccess,
@@ -41,11 +50,62 @@ export const AddAddressModal: React.FC<AddAddressModalProps> = ({
     pincode: "",
   });
 
+  // ఎర్రర్స్ ని స్టోర్ చేయడానికి స్టేట్
+  const [errors, setErrors] = useState<AddressFormErrors>({});
+
+  // ఫీల్డ్స్ వాలిడేట్ చేసే ఫంక్షన్
+  const validateField = (name: string, value: string): string => {
+    switch (name) {
+      case "street":
+        if (!value.trim()) return "Street address is required";
+        if (value.trim().length < 5) return "Address is too short";
+        return "";
+      case "city":
+        if (!value.trim()) return "City is required";
+        return "";
+      case "state":
+        if (!value.trim()) return "State is required";
+        return "";
+      case "pincode":
+        if (!value.trim()) return "PIN Code is required";
+        if (!/^\d{6}$/.test(value)) return "PIN Code must be exactly 6 digits";
+        return "";
+      default:
+        return "";
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    // Special validation for Pincode: Only allow numbers
+    if (name === "pincode") {
+      if (!/^\d*$/.test(value)) return; // Don't update if not a number
+    }
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    // Clear error when user starts typing
+    if (errors[name as keyof AddressFormErrors]) {
+      setErrors({
+        ...errors,
+        [name]: undefined,
+      });
+    }
+  };
+
+  // బాక్స్ నుండి బయటకు వచ్చినప్పుడు వాలిడేషన్ (OnBlur)
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const errorMsg = validateField(name, value);
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: errorMsg || undefined,
+    }));
   };
 
   const setAddressType = (type: string) => {
@@ -55,17 +115,28 @@ export const AddAddressModal: React.FC<AddAddressModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic Validation
-    if (
-      !formData.street.trim() ||
-      !formData.city.trim() ||
-      !formData.state.trim()
-    ) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-    if (!formData.pincode.trim() || formData.pincode.length !== 6) {
-      toast.error("Please enter a valid 6-digit pincode");
+    // 1. Submit చేసే ముందు అన్ని ఫీల్డ్స్ చెక్ చేయాలి
+    const newErrors: AddressFormErrors = {};
+    let isValid = true;
+
+    Object.keys(formData).forEach((key) => {
+      if (key !== "addressType") {
+        // addressType కి వాలిడేషన్ అవసరం లేదు
+        const error = validateField(
+          key,
+          formData[key as keyof AddressFormData],
+        );
+        if (error) {
+          newErrors[key as keyof AddressFormErrors] = error;
+          isValid = false;
+        }
+      }
+    });
+
+    setErrors(newErrors);
+
+    if (!isValid) {
+      toast.error("Please fix the errors in the form");
       return;
     }
 
@@ -88,10 +159,21 @@ export const AddAddressModal: React.FC<AddAddressModalProps> = ({
     }
   };
 
+  // Helper function for dynamic border classes based on error state
+  const getInputClass = (fieldName: keyof AddressFormErrors) => `
+    w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border rounded-xl 
+    text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none transition-all
+    ${
+      errors[fieldName]
+        ? "border-red-500 focus:ring-2 focus:ring-red-500/20"
+        : "border-gray-200 dark:border-white/10 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+    }
+  `;
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        {/* 1. Backdrop with Blur */}
+        {/* 1. Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -128,7 +210,7 @@ export const AddAddressModal: React.FC<AddAddressModalProps> = ({
 
           {/* Form Content */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Address Type Selector (Chips) */}
+            {/* Address Type Selector */}
             <div className="space-y-3">
               <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Address Type
@@ -157,72 +239,101 @@ export const AddAddressModal: React.FC<AddAddressModalProps> = ({
             {/* Inputs Grid */}
             <div className="space-y-4">
               {/* Street Address */}
-              <div className="relative group">
-                <Building
-                  className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors"
-                  size={18}
-                />
-                <input
-                  type="text"
-                  name="street"
-                  value={formData.street}
-                  onChange={handleChange}
-                  placeholder="Flat No, Building, Street Area"
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-                  required
-                />
+              <div className="space-y-1">
+                <div className="relative group">
+                  <Building
+                    className={`absolute left-4 top-3.5 transition-colors ${errors.street ? "text-red-500" : "text-gray-400 group-focus-within:text-blue-500"}`}
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    name="street"
+                    value={formData.street}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="Flat No, Building, Street Area"
+                    className={getInputClass("street")}
+                  />
+                </div>
+                {errors.street && (
+                  <p className="text-xs text-red-500 pl-2 font-medium flex items-center gap-1">
+                    <AlertCircle size={10} /> {errors.street}
+                  </p>
+                )}
               </div>
 
               {/* City & State Row */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="relative group">
-                  <MapPin
-                    className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors"
-                    size={18}
-                  />
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleChange}
-                    placeholder="City"
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-                    required
-                  />
+                <div className="space-y-1">
+                  <div className="relative group">
+                    <MapPin
+                      className={`absolute left-4 top-3.5 transition-colors ${errors.city ? "text-red-500" : "text-gray-400 group-focus-within:text-blue-500"}`}
+                      size={18}
+                    />
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="City"
+                      className={getInputClass("city")}
+                    />
+                  </div>
+                  {errors.city && (
+                    <p className="text-xs text-red-500 pl-2 font-medium">
+                      {errors.city}
+                    </p>
+                  )}
                 </div>
-                <div className="relative group">
-                  <Navigation
-                    className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors"
-                    size={18}
-                  />
-                  <input
-                    type="text"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleChange}
-                    placeholder="State"
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-                    required
-                  />
+
+                <div className="space-y-1">
+                  <div className="relative group">
+                    <Navigation
+                      className={`absolute left-4 top-3.5 transition-colors ${errors.state ? "text-red-500" : "text-gray-400 group-focus-within:text-blue-500"}`}
+                      size={18}
+                    />
+                    <input
+                      type="text"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="State"
+                      className={getInputClass("state")}
+                    />
+                  </div>
+                  {errors.state && (
+                    <p className="text-xs text-red-500 pl-2 font-medium">
+                      {errors.state}
+                    </p>
+                  )}
                 </div>
               </div>
 
               {/* Pincode */}
-              <div className="relative group">
-                <Hash
-                  className="absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition-colors"
-                  size={18}
-                />
-                <input
-                  type="text"
-                  name="pincode"
-                  value={formData.pincode}
-                  onChange={handleChange}
-                  placeholder="6-Digit PIN Code"
-                  maxLength={6}
-                  className="w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
-                  required
-                />
+              <div className="space-y-1">
+                <div className="relative group">
+                  <Hash
+                    className={`absolute left-4 top-3.5 transition-colors ${errors.pincode ? "text-red-500" : "text-gray-400 group-focus-within:text-blue-500"}`}
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    name="pincode"
+                    value={formData.pincode}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="6-Digit PIN Code"
+                    maxLength={6}
+                    className={getInputClass("pincode")}
+                  />
+                </div>
+                {errors.pincode && (
+                  <p className="text-xs text-red-500 pl-2 font-medium flex items-center gap-1">
+                    <AlertCircle size={10} /> {errors.pincode}
+                  </p>
+                )}
               </div>
             </div>
 

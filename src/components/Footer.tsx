@@ -362,7 +362,8 @@ export const Footer = () => {
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/forgot-password" ||
-    pathname?.startsWith("/admin")
+    pathname?.startsWith("/admin") ||
+    pathname === "/chat"
   ) {
     return null;
   }
