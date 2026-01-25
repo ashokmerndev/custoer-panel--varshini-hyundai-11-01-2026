@@ -1,1281 +1,692 @@
-// // src/app/profile/page.tsx
-// 'use client';
-
-// import { useEffect, useState } from 'react';
-// import { motion, AnimatePresence } from 'framer-motion';
-// import { useAuth } from '@/hooks/useAuth';
-// import { useRouter } from 'next/navigation';
-// import {
-//   User,
-//   Package,
-//   MapPin,
-//   Edit,
-//   Save,
-//   X,
-//   Plus,
-//   Trash2,
-//   Phone,
-//   Mail,
-//   Home,
-//   Building,
-// } from 'lucide-react';
-// import apiClient from '@/services/apiClient';
-// import toast from 'react-hot-toast';
-// import { Address } from '@/store/useStore';
-// import styles from './page.module.css';
-
-// type Tab = 'profile' | 'orders' | 'addresses';
-
-// interface AddressFormData {
-//   addressType: string;
-//   street: string;
-//   city: string;
-//   state: string;
-//   pincode: string;
-//   isDefault: boolean;
-// }
-
-// export default function ProfilePage() {
-//   const { user, isAuthenticated, loading: authLoading } = useAuth();
-//   const router = useRouter();
-//   const [activeTab, setActiveTab] = useState<Tab>('profile');
-//   const [isEditing, setIsEditing] = useState(false);
-//   const [showAddressModal, setShowAddressModal] = useState(false);
-//   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-//   const [loading, setLoading] = useState(false);
-
-//   // Profile form state
-//   const [profileData, setProfileData] = useState({
-//     name: '',
-//     phone: '',
-//   });
-
-//   // Address form state
-//   const [addressData, setAddressData] = useState<AddressFormData>({
-//     addressType: 'Home',
-//     street: '',
-//     city: '',
-//     state: '',
-//     pincode: '',
-//     isDefault: false,
-//   });
-
-//   useEffect(() => {
-//     if (!authLoading && !isAuthenticated) {
-//       router.push('/login');
-//     }
-//   }, [authLoading, isAuthenticated, router]);
-
-//   useEffect(() => {
-//     if (user) {
-//       setProfileData({
-//         name: user.name,
-//         phone: user.phone,
-//       });
-//     }
-//   }, [user]);
-
-//   const handleProfileUpdate = async () => {
-//     setLoading(true);
-//     try {
-//       const response = await apiClient.put('/auth/profile', profileData);
-//       if (response.data.success) {
-//         toast.success('Profile updated successfully');
-//         setIsEditing(false);
-//       }
-//     } catch (error: any) {
-//       toast.error(error.response?.data?.error || 'Failed to update profile');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleAddAddress = async () => {
-//     setLoading(true);
-//     try {
-//       const response = await apiClient.post('/auth/address', addressData);
-//       if (response.data.success) {
-//         toast.success('Address added successfully');
-//         setShowAddressModal(false);
-//         resetAddressForm();
-//         // Refresh user data to get updated addresses
-//         window.location.reload();
-//       }
-//     } catch (error: any) {
-//       toast.error(error.response?.data?.error || 'Failed to add address');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleUpdateAddress = async () => {
-//     if (!editingAddress) return;
-
-//     setLoading(true);
-//     try {
-//       const response = await apiClient.put(`/auth/address/${editingAddress._id}`, addressData);
-//       if (response.data.success) {
-//         toast.success('Address updated successfully');
-//         setShowAddressModal(false);
-//         setEditingAddress(null);
-//         resetAddressForm();
-//         window.location.reload();
-//       }
-//     } catch (error: any) {
-//       toast.error(error.response?.data?.error || 'Failed to update address');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleDeleteAddress = async (addressId: string) => {
-//     if (!confirm('Are you sure you want to delete this address?')) return;
-
-//     try {
-//       const response = await apiClient.delete(`/auth/address/${addressId}`);
-//       if (response.data.success) {
-//         toast.success('Address deleted successfully');
-//         window.location.reload();
-//       }
-//     } catch (error: any) {
-//       toast.error(error.response?.data?.error || 'Failed to delete address');
-//     }
-//   };
-
-//   const openAddressModal = (address?: Address) => {
-//     if (address) {
-//       setEditingAddress(address);
-//       setAddressData({
-//         addressType: address.addressType,
-//         street: address.street,
-//         city: address.city,
-//         state: address.state,
-//         pincode: address.pincode,
-//         isDefault: address.isDefault,
-//       });
-//     }
-//     setShowAddressModal(true);
-//   };
-
-//   const resetAddressForm = () => {
-//     setAddressData({
-//       addressType: 'Home',
-//       street: '',
-//       city: '',
-//       state: '',
-//       pincode: '',
-//       isDefault: false,
-//     });
-//     setEditingAddress(null);
-//   };
-
-//   if (authLoading || !user) {
-//     return <LoadingSkeleton />;
-//   }
-
-//   return (
-//     <div className={styles.container}>
-//       <div className={styles.contentWrapper}>
-//         {/* Sidebar */}
-//         <motion.aside
-//           initial={{ opacity: 0, x: -50 }}
-//           animate={{ opacity: 1, x: 0 }}
-//           transition={{ duration: 0.6 }}
-//           className={styles.sidebar}
-//         >
-//           <div className={styles.sidebarHeader}>
-//             <div className={styles.avatar}>
-//               {user.name.charAt(0).toUpperCase()}
-//             </div>
-//             <h2 className={styles.userName}>{user.name}</h2>
-//             <p className={styles.userEmail}>{user.email}</p>
-//           </div>
-
-//           <nav className={styles.nav}>
-//             <button
-//               onClick={() => setActiveTab('profile')}
-//               className={`${styles.navItem} ${activeTab === 'profile' ? styles.navItemActive : ''}`}
-//             >
-//               <User size={20} />
-//               <span>Profile</span>
-//             </button>
-//             <button
-//               onClick={() => setActiveTab('orders')}
-//               className={`${styles.navItem} ${activeTab === 'orders' ? styles.navItemActive : ''}`}
-//             >
-//               <Package size={20} />
-//               <span>Orders</span>
-//             </button>
-//             <button
-//               onClick={() => setActiveTab('addresses')}
-//               className={`${styles.navItem} ${activeTab === 'addresses' ? styles.navItemActive : ''}`}
-//             >
-//               <MapPin size={20} />
-//               <span>Addresses</span>
-//             </button>
-//           </nav>
-//         </motion.aside>
-
-//         {/* Main Content */}
-//         <motion.main
-//           initial={{ opacity: 0, y: 20 }}
-//           animate={{ opacity: 1, y: 0 }}
-//           transition={{ duration: 0.6, delay: 0.2 }}
-//           className={styles.mainContent}
-//         >
-//           <AnimatePresence mode="wait">
-//             {activeTab === 'profile' && (
-//               <motion.div
-//                 key="profile"
-//                 initial={{ opacity: 0, y: 20 }}
-//                 animate={{ opacity: 1, y: 0 }}
-//                 exit={{ opacity: 0, y: -20 }}
-//                 className={styles.section}
-//               >
-//                 <div className={styles.sectionHeader}>
-//                   <h2 className={styles.sectionTitle}>Profile Information</h2>
-//                   {!isEditing ? (
-//                     <motion.button
-//                       whileHover={{ scale: 1.05 }}
-//                       whileTap={{ scale: 0.95 }}
-//                       onClick={() => setIsEditing(true)}
-//                       className={styles.iconButton}
-//                     >
-//                       <Edit size={18} />
-//                       Edit
-//                     </motion.button>
-//                   ) : (
-//                     <div className="flex gap-2">
-//                       <motion.button
-//                         whileHover={{ scale: 1.05 }}
-//                         whileTap={{ scale: 0.95 }}
-//                         onClick={handleProfileUpdate}
-//                         disabled={loading}
-//                         className={styles.saveButton}
-//                       >
-//                         <Save size={18} />
-//                         Save
-//                       </motion.button>
-//                       <motion.button
-//                         whileHover={{ scale: 1.05 }}
-//                         whileTap={{ scale: 0.95 }}
-//                         onClick={() => {
-//                           setIsEditing(false);
-//                           setProfileData({ name: user.name, phone: user.phone });
-//                         }}
-//                         className={styles.cancelButton}
-//                       >
-//                         <X size={18} />
-//                         Cancel
-//                       </motion.button>
-//                     </div>
-//                   )}
-//                 </div>
-
-//                 <div className={styles.formGrid}>
-//                   <div className={styles.formGroup}>
-//                     <label className={styles.label}>
-//                       <User size={16} />
-//                       Full Name
-//                     </label>
-//                     <input
-//                       type="text"
-//                       value={profileData.name}
-//                       onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-//                       disabled={!isEditing}
-//                       className={styles.input}
-//                     />
-//                   </div>
-
-//                   <div className={styles.formGroup}>
-//                     <label className={styles.label}>
-//                       <Mail size={16} />
-//                       Email Address
-//                     </label>
-//                     <input
-//                       type="email"
-//                       value={user.email}
-//                       disabled
-//                       className={styles.inputDisabled}
-//                     />
-//                   </div>
-
-//                   <div className={styles.formGroup}>
-//                     <label className={styles.label}>
-//                       <Phone size={16} />
-//                       Phone Number
-//                     </label>
-//                     <input
-//                       type="tel"
-//                       value={profileData.phone}
-//                       onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-//                       disabled={!isEditing}
-//                       className={styles.input}
-//                     />
-//                   </div>
-//                 </div>
-//               </motion.div>
-//             )}
-
-//             {activeTab === 'orders' && (
-//               <motion.div
-//                 key="orders"
-//                 initial={{ opacity: 0, y: 20 }}
-//                 animate={{ opacity: 1, y: 0 }}
-//                 exit={{ opacity: 0, y: -20 }}
-//                 className={styles.section}
-//               >
-//                 <h2 className={styles.sectionTitle}>Order History</h2>
-//                 <p className={styles.comingSoon}>
-//                   View your order history at <a href="/orders" className="text-hyundai-blue hover:underline">/orders</a>
-//                 </p>
-//               </motion.div>
-//             )}
-
-//             {activeTab === 'addresses' && (
-//               <motion.div
-//                 key="addresses"
-//                 initial={{ opacity: 0, y: 20 }}
-//                 animate={{ opacity: 1, y: 0 }}
-//                 exit={{ opacity: 0, y: -20 }}
-//                 className={styles.section}
-//               >
-//                 <div className={styles.sectionHeader}>
-//                   <h2 className={styles.sectionTitle}>Saved Addresses</h2>
-//                   <motion.button
-//                     whileHover={{ scale: 1.05 }}
-//                     whileTap={{ scale: 0.95 }}
-//                     onClick={() => openAddressModal()}
-//                     className={styles.addButton}
-//                   >
-//                     <Plus size={18} />
-//                     Add Address
-//                   </motion.button>
-//                 </div>
-
-//                 <div className={styles.addressGrid}>
-//                   {user.addresses && user.addresses.length > 0 ? (
-//                     user.addresses.map((address, index) => (
-//                       <motion.div
-//                         key={address._id}
-//                         initial={{ opacity: 0, scale: 0.9 }}
-//                         animate={{ opacity: 1, scale: 1 }}
-//                         transition={{ delay: index * 0.1 }}
-//                         className={styles.addressCard}
-//                       >
-//                         {address.isDefault && (
-//                           <span className={styles.defaultBadge}>Default</span>
-//                         )}
-
-//                         <div className={styles.addressHeader}>
-//                           <div className={styles.addressType}>
-//                             {address.addressType === 'Home' ? <Home size={20} /> : <Building size={20} />}
-//                             <span>{address.addressType}</span>
-//                           </div>
-//                           <div className={styles.addressActions}>
-//                             <motion.button
-//                               whileHover={{ scale: 1.1 }}
-//                               whileTap={{ scale: 0.9 }}
-//                               onClick={() => openAddressModal(address)}
-//                               className={styles.actionIcon}
-//                             >
-//                               <Edit size={16} />
-//                             </motion.button>
-//                             <motion.button
-//                               whileHover={{ scale: 1.1 }}
-//                               whileTap={{ scale: 0.9 }}
-//                               onClick={() => handleDeleteAddress(address._id)}
-//                               className={`${styles.actionIcon} ${styles.deleteIcon}`}
-//                             >
-//                               <Trash2 size={16} />
-//                             </motion.button>
-//                           </div>
-//                         </div>
-
-//                         <div className={styles.addressDetails}>
-//                           <p>{address.street}</p>
-//                           <p>{address.city}, {address.state}</p>
-//                           <p>PIN: {address.pincode}</p>
-//                         </div>
-//                       </motion.div>
-//                     ))
-//                   ) : (
-//                     <p className={styles.noAddresses}>
-//                       No addresses saved. Add your first address to get started!
-//                     </p>
-//                   )}
-//                 </div>
-//               </motion.div>
-//             )}
-//           </AnimatePresence>
-//         </motion.main>
-//       </div>
-
-//      {/* Address Modal */}
-// <AnimatePresence>
-//   {showAddressModal && (
-//     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-//       {/* Overlay - Centering Helper */}
-//       <motion.div
-//         initial={{ opacity: 0 }}
-//         animate={{ opacity: 1 }}
-//         exit={{ opacity: 0 }}
-//         onClick={() => {
-//           setShowAddressModal(false);
-//           resetAddressForm();
-//         }}
-//         className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-//       />
-
-//       {/* Modal Content - Centered */}
-//       <motion.div
-//         initial={{ opacity: 0, scale: 0.9, y: 20 }}
-//         animate={{ opacity: 1, scale: 1, y: 0 }}
-//         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-//         className="relative bg-[#0A101F] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden z-10"
-//       >
-//         <div className="p-6 border-b border-white/10 flex justify-between items-center">
-//           <h3 className="text-lg font-bold text-white">
-//             {editingAddress ? 'Edit Address' : 'Add New Address'}
-//           </h3>
-//           <button
-//             onClick={() => {
-//               setShowAddressModal(false);
-//               resetAddressForm();
-//             }}
-//             className="text-gray-400 hover:text-white transition-colors"
-//           >
-//             <X size={20} />
-//           </button>
-//         </div>
-
-//         <div className="p-6 space-y-4">
-//           <div>
-//             <label className="block text-xs text-gray-400 mb-1.5 font-medium">Address Type</label>
-//             <select
-//               value={addressData.addressType}
-//               onChange={(e) => setAddressData({ ...addressData, addressType: e.target.value })}
-//               className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-hyundai-blue focus:outline-none"
-//             >
-//               <option value="Home">Home</option>
-//               <option value="Work">Work</option>
-//               <option value="Other">Other</option>
-//             </select>
-//           </div>
-
-//           <div>
-//             <label className="block text-xs text-gray-400 mb-1.5 font-medium">Street Address</label>
-//             <input
-//               type="text"
-//               value={addressData.street}
-//               onChange={(e) => setAddressData({ ...addressData, street: e.target.value })}
-//               placeholder="123 Main Street"
-//               className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-hyundai-blue focus:outline-none placeholder:text-gray-600"
-//             />
-//           </div>
-
-//           <div className="grid grid-cols-2 gap-4">
-//             <div>
-//               <label className="block text-xs text-gray-400 mb-1.5 font-medium">City</label>
-//               <input
-//                 type="text"
-//                 value={addressData.city}
-//                 onChange={(e) => setAddressData({ ...addressData, city: e.target.value })}
-//                 placeholder="Mumbai"
-//                 className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-hyundai-blue focus:outline-none placeholder:text-gray-600"
-//               />
-//             </div>
-//             <div>
-//               <label className="block text-xs text-gray-400 mb-1.5 font-medium">State</label>
-//               <input
-//                 type="text"
-//                 value={addressData.state}
-//                 onChange={(e) => setAddressData({ ...addressData, state: e.target.value })}
-//                 placeholder="MH"
-//                 className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-hyundai-blue focus:outline-none placeholder:text-gray-600"
-//               />
-//             </div>
-//           </div>
-
-//           <div>
-//             <label className="block text-xs text-gray-400 mb-1.5 font-medium">PIN Code</label>
-//             <input
-//               type="text"
-//               value={addressData.pincode}
-//               onChange={(e) => setAddressData({ ...addressData, pincode: e.target.value })}
-//               placeholder="400001"
-//               maxLength={6}
-//               className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-hyundai-blue focus:outline-none placeholder:text-gray-600"
-//             />
-//           </div>
-
-//           <div className="flex items-center gap-2 pt-2">
-//             <input
-//               type="checkbox"
-//               id="isDefault"
-//               checked={addressData.isDefault}
-//               onChange={(e) => setAddressData({ ...addressData, isDefault: e.target.checked })}
-//               className="w-4 h-4 rounded border-white/20 bg-black/20 text-hyundai-blue focus:ring-offset-0 focus:ring-transparent"
-//             />
-//             <label htmlFor="isDefault" className="text-sm text-gray-300 cursor-pointer select-none">
-//               Set as default address
-//             </label>
-//           </div>
-//         </div>
-
-//         <div className="p-6 pt-0">
-//           <motion.button
-//             whileHover={{ scale: 1.02 }}
-//             whileTap={{ scale: 0.98 }}
-//             onClick={editingAddress ? handleUpdateAddress : handleAddAddress}
-//             disabled={loading}
-//             className="w-full bg-hyundai-blue hover:bg-blue-600 text-white font-medium py-2.5 rounded-xl transition-colors shadow-lg shadow-blue-500/20"
-//           >
-//             {loading ? 'Saving...' : editingAddress ? 'Update Address' : 'Add Address'}
-//           </motion.button>
-//         </div>
-//       </motion.div>
-//     </div>
-//   )}
-// </AnimatePresence>
-//     </div>
-//   );
-// }
-
-// function LoadingSkeleton() {
-//   return (
-//     <div className={styles.container}>
-//       <div className={styles.contentWrapper}>
-//         <div className={`${styles.sidebar} skeleton`} />
-//         <div className={`${styles.mainContent} skeleton`} />
-//       </div>
-//     </div>
-//   );
-// }
-
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/hooks/useAuth";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   User,
-  Package,
-  MapPin,
-  Edit,
+  Lock,
   Save,
-  X,
-  Plus,
-  Trash2,
-  Phone,
+  Eye,
+  EyeOff,
+  Camera,
+  Bell,
+  Shield,
+  LogOut,
   Mail,
-  Home,
-  Building,
-  ChevronRight,
+  Smartphone,
+  Loader2,
 } from "lucide-react";
-import apiClient from "@/services/apiClient";
-import toast from "react-hot-toast";
-import { Address } from "@/store/useStore";
+import Button from "@/components/ui/Button";
+import { AdminAuthService } from "@/lib/api";
+import { toast } from "sonner";
 
-type Tab = "profile" | "orders" | "addresses";
+// --- Types ---
+type TabType = "profile" | "security" | "notifications";
 
-interface AddressFormData {
-  addressType: string;
-  street: string;
-  city: string;
-  state: string;
-  pincode: string;
-  isDefault: boolean;
+interface ProfileData {
+  name: string;
+  email: string;
+  phone: string;
+  bio: string;
+  avatar?: string;
+  role?: string;
 }
 
-export default function ProfilePage() {
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
+interface NotificationSettings {
+  emailAlerts: boolean;
+  securityAlerts: boolean;
+  marketingEmails: boolean;
+}
+
+export default function SettingsPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<Tab>("profile");
-  const [isEditing, setIsEditing] = useState(false);
-  const [showAddressModal, setShowAddressModal] = useState(false);
-  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>("profile");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
-  const [profileData, setProfileData] = useState({
+  // Profile State
+  const [profileData, setProfileData] = useState<ProfileData>({
     name: "",
+    email: "",
     phone: "",
+    bio: "",
+    role: "",
   });
 
-  const [addressData, setAddressData] = useState<AddressFormData>({
-    addressType: "Home",
-    street: "",
-    city: "",
-    state: "",
-    pincode: "",
-    isDefault: false,
+  // Avatar State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
+  // Password State
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
+  // Notifications State
+  const [notifications, setNotifications] = useState<NotificationSettings>({
+    emailAlerts: true,
+    securityAlerts: true,
+    marketingEmails: false,
+  });
+
+  // 1. Fetch Profile on Load
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    const fetchProfile = async () => {
+      try {
+        const response = await AdminAuthService.getProfile();
+
+        // GET API returns: { data: { data: { ...user } } }
+        const rootData = response.data;
+        const userProfile = rootData?.data?.data || rootData?.data || {};
+
+        setProfileData({
+          name: userProfile.name || "",
+          email: userProfile.email || "",
+          phone: userProfile.phone || "",
+          bio: userProfile.bio || "",
+          role: userProfile.role || "ADMIN",
+        });
+
+        if (userProfile.avatar) {
+          setAvatarPreview(userProfile.avatar);
+        }
+
+        if (userProfile.notifications) {
+          setNotifications((prev) => ({
+            ...prev,
+            ...userProfile.notifications,
+          }));
+        }
+      } catch (error: any) {
+        console.error("Profile fetch error:", error);
+        toast.error("Failed to load profile data");
+      } finally {
+        setIsPageLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  // 2. Handle Image Selection
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size must be less than 5MB");
+        return;
+      }
+      setAvatarFile(file);
+
+      // Local preview logic
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // 3. Handle Profile Update (Using FormData)
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // ✅ FIX: Use FormData for both text and file
+      const formData = new FormData();
+
+      // Text Fields
+      formData.append("name", profileData.name);
+      formData.append("phone", profileData.phone || "");
+      formData.append("bio", profileData.bio || "");
+
+      // We don't update email here typically, but if backend allows:
+      // formData.append("email", profileData.email);
+
+      // File Field
+      if (avatarFile) {
+        formData.append("avatar", avatarFile);
+      }
+
+      // API Call
+      const response = await AdminAuthService.updateProfile(formData);
+
+      // ✅ FIX: Backend returns updated data in 'admin' key
+      // Structure: { success: true, data: { admin: { ... } } }
+      const responseData = response.data;
+      const updatedAdmin = responseData?.data?.admin || responseData?.data;
+
+      // Sync State with updated backend data
+      if (updatedAdmin) {
+        setProfileData((prev) => ({
+          ...prev,
+          name: updatedAdmin.name,
+          phone: updatedAdmin.phone,
+          bio: updatedAdmin.bio,
+          avatar: updatedAdmin.avatar,
+        }));
+
+        if (updatedAdmin.avatar) {
+          setAvatarPreview(updatedAdmin.avatar);
+        }
+      }
+
+      toast.success("Profile updated successfully!");
+      setAvatarFile(null); // Clear file input
+    } catch (error: any) {
+      console.error("Profile update error:", error);
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 4. Handle Notification Update
+  const handleSaveNotifications = async () => {
+    setIsLoading(true);
+    try {
+      // Send as JSON object - Backend handles this via req.body directly
+      await AdminAuthService.updateProfile({
+        notifications: notifications,
+      });
+      toast.success("Notification preferences saved!");
+    } catch (error: any) {
+      console.error("Notification update error:", error);
+      toast.error("Failed to save preferences");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 5. Handle Password Change
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await AdminAuthService.changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      toast.success("Password changed! Please login again.");
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error: any) {
+      console.error("Password change error:", error);
+      toast.error(error.response?.data?.message || "Failed to change password");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 6. Logout All Devices
+  const handleLogoutAllDevices = async () => {
+    if (!confirm("Are you sure? You will be logged out of this device too."))
+      return;
+
+    try {
+      await AdminAuthService.logoutAllDevices();
+      toast.success("Logged out of all sessions");
+      localStorage.removeItem("token"); // or cookie clear logic
       router.push("/login");
-    }
-  }, [authLoading, isAuthenticated, router]);
-
-  useEffect(() => {
-    if (user) {
-      setProfileData({
-        name: user.name,
-        phone: user.phone || "",
-      });
-    }
-  }, [user]);
-
-  const handleProfileUpdate = async () => {
-    setLoading(true);
-    try {
-      const response = await apiClient.put("/auth/profile", profileData);
-      if (response.data.success) {
-        toast.success("Profile updated successfully", { icon: "✨" });
-        setIsEditing(false);
-      }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to update profile");
-    } finally {
-      setLoading(false);
+      toast.error("Failed to logout other sessions");
     }
   };
 
-  const handleAddAddress = async () => {
-    setLoading(true);
-    try {
-      const response = await apiClient.post("/auth/address", addressData);
-      if (response.data.success) {
-        toast.success("Address added successfully", { icon: "🏠" });
-        setShowAddressModal(false);
-        resetAddressForm();
-        window.location.reload();
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to add address");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdateAddress = async () => {
-    if (!editingAddress) return;
-    setLoading(true);
-    try {
-      const response = await apiClient.put(
-        `/auth/address/${editingAddress._id}`,
-        addressData,
-      );
-      if (response.data.success) {
-        toast.success("Address updated successfully", { icon: "✅" });
-        setShowAddressModal(false);
-        setEditingAddress(null);
-        resetAddressForm();
-        window.location.reload();
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to update address");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteAddress = async (addressId: string) => {
-    if (!confirm("Are you sure you want to delete this address?")) return;
-    try {
-      const response = await apiClient.delete(`/auth/address/${addressId}`);
-      if (response.data.success) {
-        toast.success("Address deleted successfully", { icon: "🗑️" });
-        window.location.reload();
-      }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to delete address");
-    }
-  };
-
-  const openAddressModal = (address?: Address) => {
-    if (address) {
-      setEditingAddress(address);
-      setAddressData({
-        addressType: address.addressType,
-        street: address.street,
-        city: address.city,
-        state: address.state,
-        pincode: address.pincode,
-        isDefault: address.isDefault,
-      });
-    }
-    setShowAddressModal(true);
-  };
-
-  const resetAddressForm = () => {
-    setAddressData({
-      addressType: "Home",
-      street: "",
-      city: "",
-      state: "",
-      pincode: "",
-      isDefault: false,
-    });
-    setEditingAddress(null);
-  };
-
-  if (authLoading || !user) {
-    return <LoadingSkeleton />;
+  if (isPageLoading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
   }
 
-  // --- ATTRACTIVE STYLES WITH GRADIENTS & GLASSMORPHISM ---
-
-  // Main Background with subtle gradient
-  const containerClass =
-    "min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-950 dark:via-[#0A101F] dark:to-black pt-24 pb-12 px-4 sm:px-6 lg:px-8";
-  const wrapperClass = "max-w-6xl mx-auto flex flex-col md:flex-row gap-8";
-
-  // Glassmorphism Card Style (Used for Sidebar and Main Content)
-  const glassCardClass =
-    "bg-white/70 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.5)] p-6 sm:p-8";
-
-  const sidebarClass = "w-full md:w-1/4 flex-shrink-0";
-
-  // Sticky sidebar behavior
-  const sidebarContainerClass = `${glassCardClass} md:sticky md:top-28 h-fit`;
-
-  // Navigation Buttons Styling
-  const getNavBtnClass = (isActive: boolean) => `
-    w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 font-medium text-sm sm:text-base group
-    ${
-      isActive
-        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
-        : "text-gray-600 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-white/5 hover:text-blue-700 dark:hover:text-white"
-    }
-  `;
-
-  const mainClass = "flex-1 w-full min-w-0";
-  const titleClass =
-    "text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 mb-8";
-
-  // Modern Input Styling
-  const inputGroupClass = "space-y-2.5";
-  const labelClass =
-    "flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300";
-  const inputClass =
-    "w-full bg-white/50 dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed backdrop-blur-sm placeholder:text-gray-400";
-
-  // Gradient Button Styling (Primary)
-  const primaryBtnClass =
-    "flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transition-all scale-[0.99] hover:scale-100 active:scale-95 font-semibold text-sm";
-
-  // Secondary Button Styling
-  const secondaryBtnClass =
-    "flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 dark:bg-white/5 text-blue-700 dark:text-blue-300 rounded-xl hover:bg-blue-100 dark:hover:bg-white/10 transition-colors text-sm font-medium border border-blue-100 dark:border-white/5";
-
   return (
-    <div className={containerClass}>
-      <div className={wrapperClass}>
-        {/* --- Sidebar --- */}
-        <motion.aside
+    <div className="space-y-6 max-w-5xl mx-auto pb-20">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-3xl font-bold text-white">Settings</h1>
+        <p className="mt-1 text-gray-400">
+          Manage your profile, security, and notification preferences
+        </p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Sidebar Navigation */}
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className={sidebarClass}
+          transition={{ delay: 0.1 }}
+          className="lg:col-span-3 space-y-2"
         >
-          <div className={sidebarContainerClass}>
-            <div className="flex flex-col items-center text-center mb-8">
-              {/* Attractive Avatar with Gradient & Glow */}
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-4xl sm:text-5xl font-bold text-white shadow-xl border-4 border-white dark:border-[#0A101F]">
-                  {user.name?.charAt(0).toUpperCase() || "U"}
-                </div>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-4">
-                {user.name}
-              </h2>
-              <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mt-1 break-all">
-                {user.email}
-              </p>
-            </div>
-
-            <nav className="space-y-2">
+          <div className="rounded-xl border border-white/10 bg-white/5 p-2 backdrop-blur-sm sticky top-6">
+            {[
+              { id: "profile", icon: User, label: "My Profile" },
+              { id: "security", icon: Shield, label: "Security" },
+              { id: "notifications", icon: Bell, label: "Notifications" },
+            ].map((tab) => (
               <button
-                onClick={() => setActiveTab("profile")}
-                className={getNavBtnClass(activeTab === "profile")}
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
+                  activeTab === tab.id
+                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
               >
-                <div className="flex items-center gap-3">
-                  <User size={20} /> <span>Profile</span>
-                </div>
-                <ChevronRight
-                  size={18}
-                  className={`transition-transform ${activeTab === "profile" ? "rotate-90" : "opacity-0 group-hover:opacity-50"}`}
-                />
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
               </button>
-              <button
-                onClick={() => setActiveTab("orders")}
-                className={getNavBtnClass(activeTab === "orders")}
-              >
-                <div className="flex items-center gap-3">
-                  <Package size={20} /> <span>Orders</span>
-                </div>
-                <ChevronRight
-                  size={18}
-                  className={`transition-transform ${activeTab === "orders" ? "rotate-90" : "opacity-0 group-hover:opacity-50"}`}
-                />
-              </button>
-              <button
-                onClick={() => setActiveTab("addresses")}
-                className={getNavBtnClass(activeTab === "addresses")}
-              >
-                <div className="flex items-center gap-3">
-                  <MapPin size={20} /> <span>Addresses</span>
-                </div>
-                <ChevronRight
-                  size={18}
-                  className={`transition-transform ${activeTab === "addresses" ? "rotate-90" : "opacity-0 group-hover:opacity-50"}`}
-                />
-              </button>
-            </nav>
+            ))}
           </div>
-        </motion.aside>
+        </motion.div>
 
-        {/* --- Main Content --- */}
-        <motion.main
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-          className={mainClass}
-        >
+        {/* Main Content Area */}
+        <div className="lg:col-span-9">
           <AnimatePresence mode="wait">
-            {/* PROFILE TAB */}
+            {/* --- PROFILE TAB --- */}
             {activeTab === "profile" && (
               <motion.div
                 key="profile"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                className={glassCardClass}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-6"
               >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 border-b border-gray-200/50 dark:border-white/5 pb-6">
-                  <div>
-                    <h2 className={titleClass + " mb-1"}>
-                      Personal Information
-                    </h2>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
-                      Manage your personal details.
-                    </p>
-                  </div>
-                  {!isEditing ? (
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className={secondaryBtnClass}
-                    >
-                      <Edit size={16} /> Edit Profile
-                    </button>
-                  ) : (
-                    <div className="flex gap-3 w-full sm:w-auto">
-                      <button
-                        onClick={handleProfileUpdate}
-                        disabled={loading}
-                        className={primaryBtnClass + " flex-1 sm:flex-none"}
-                      >
-                        {loading ? (
-                          <span className="animate-spin">❄️</span>
+                {/* Profile Header & Avatar Upload */}
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-sm relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-blue-600/20 to-purple-600/20" />
+                  <div className="relative pt-8 flex flex-col sm:flex-row items-center sm:items-end gap-6">
+                    <div className="relative group">
+                      <div className="h-24 w-24 rounded-full border-4 border-[#0f1115] bg-gray-800 overflow-hidden relative">
+                        {avatarPreview ? (
+                          <img
+                            src={avatarPreview}
+                            alt="Profile"
+                            className="h-full w-full object-cover"
+                          />
                         ) : (
-                          <Save size={18} />
-                        )}{" "}
-                        Save
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsEditing(false);
-                          setProfileData({
-                            name: user.name,
-                            phone: user.phone || "",
-                          });
-                        }}
-                        className="px-4 py-2.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors text-sm font-medium flex items-center justify-center gap-2 flex-1 sm:flex-none"
-                      >
-                        <X size={18} /> Cancel
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <div className={inputGroupClass + " lg:col-span-2"}>
-                    <label className={labelClass}>
-                      <User
-                        size={18}
-                        className="text-blue-600 dark:text-blue-400"
-                      />{" "}
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      value={profileData.name}
-                      onChange={(e) =>
-                        setProfileData({ ...profileData, name: e.target.value })
-                      }
-                      disabled={!isEditing}
-                      className={inputClass}
-                    />
-                  </div>
-
-                  <div className={inputGroupClass}>
-                    <label className={labelClass}>
-                      <Mail
-                        size={18}
-                        className="text-blue-600 dark:text-blue-400"
-                      />{" "}
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={user.email}
-                      disabled
-                      className={`${inputClass} opacity-70`}
-                    />
-                  </div>
-
-                  <div className={inputGroupClass}>
-                    <label className={labelClass}>
-                      <Phone
-                        size={18}
-                        className="text-blue-600 dark:text-blue-400"
-                      />{" "}
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      value={profileData.phone}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          phone: e.target.value,
-                        })
-                      }
-                      disabled={!isEditing}
-                      className={inputClass}
-                      placeholder="+91 99999 99999"
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ORDERS TAB */}
-            {activeTab === "orders" && (
-              <motion.div
-                key="orders"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                className={glassCardClass}
-              >
-                <h2 className={titleClass}>Order History</h2>
-                <div className="flex flex-col items-center justify-center py-16 text-center rounded-3xl bg-blue-50/50 dark:bg-black/20 border border-blue-100 dark:border-white/5">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                    <Package
-                      size={40}
-                      className="text-blue-600 dark:text-blue-400 drop-shadow-sm"
-                    />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    No orders yet
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                    Once you place orders, they will appear here. Start shopping
-                    now!
-                  </p>
-                  <a href="/orders" className={primaryBtnClass}>
-                    Browse Products
-                  </a>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ADDRESSES TAB */}
-            {activeTab === "addresses" && (
-              <motion.div
-                key="addresses"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                className={glassCardClass}
-              >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 border-b border-gray-200/50 dark:border-white/5 pb-6">
-                  <div>
-                    <h2 className={titleClass + " mb-1"}>Saved Addresses</h2>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
-                      Manage your delivery locations.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => openAddressModal()}
-                    className={primaryBtnClass + " w-full sm:w-auto"}
-                  >
-                    <Plus size={18} /> Add New Address
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {user.addresses && user.addresses.length > 0 ? (
-                    user.addresses.map((address, index) => (
-                      <motion.div
-                        key={address._id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="relative bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/10 rounded-2xl p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group backdrop-blur-md"
-                      >
-                        {/* Gradient Border Effect on Hover */}
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
-
-                        {address.isDefault && (
-                          <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-1 rounded-full shadow-sm">
-                            Default
-                          </span>
+                          <div className="h-full w-full flex items-center justify-center bg-blue-500/20 text-blue-400 text-3xl font-bold">
+                            {profileData.name?.charAt(0)?.toUpperCase() || "A"}
+                          </div>
                         )}
-
-                        <div className="flex items-center gap-4 mb-5">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 flex items-center justify-center text-blue-600 dark:text-blue-300 shadow-sm">
-                            {address.addressType === "Home" ? (
-                              <Home size={22} />
-                            ) : (
-                              <Building size={22} />
-                            )}
-                          </div>
-                          <div>
-                            <span className="font-bold text-lg text-gray-900 dark:text-white">
-                              {address.addressType}
-                            </span>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              Delivery Address
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="text-sm text-gray-600 dark:text-gray-300 space-y-1.5 mb-6 pl-1">
-                          <p className="font-medium">{address.street}</p>
-                          <p>
-                            {address.city}, {address.state}
-                          </p>
-                          <p className="font-semibold text-blue-600 dark:text-blue-400">
-                            PIN: {address.pincode}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-3 pt-4 border-t border-gray-200/50 dark:border-white/10">
-                          <button
-                            onClick={() => openAddressModal(address)}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/5 hover:bg-blue-50 dark:hover:bg-white/10 hover:text-blue-700 dark:hover:text-white rounded-xl transition-all"
-                          >
-                            <Edit size={16} /> Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteAddress(address._id)}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-xl transition-all"
-                          >
-                            <Trash2 size={16} /> Delete
-                          </button>
-                        </div>
-                      </motion.div>
-                    ))
-                  ) : (
-                    <div className="col-span-full py-16 text-center text-gray-500 dark:text-gray-400 bg-blue-50/50 dark:bg-black/20 rounded-3xl border border-dashed border-blue-200 dark:border-white/10 backdrop-blur-sm">
-                      <MapPin
-                        size={48}
-                        className="mx-auto mb-4 text-blue-400/50"
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute bottom-0 right-0 p-2 bg-blue-500 rounded-full text-white shadow-lg cursor-pointer hover:bg-blue-600 transition-colors z-10"
+                      >
+                        <Camera className="h-4 w-4" />
+                      </button>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageChange}
                       />
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        No addresses saved
-                      </h3>
-                      <p>Add an address for faster checkout.</p>
                     </div>
-                  )}
+                    <div className="text-center sm:text-left flex-1 pb-2">
+                      <h2 className="text-2xl font-bold text-white">
+                        {profileData.name || "Loading..."}
+                      </h2>
+                      <div className="flex items-center justify-center sm:justify-start gap-3 mt-1 text-gray-400 text-sm">
+                        <span className="flex items-center gap-1">
+                          <Shield className="h-3 w-3 text-blue-400" />
+                          {(profileData.role || "ADMIN").toUpperCase()}
+                        </span>
+                        <span>•</span>
+                        <span>{profileData.email}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Profile Form */}
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-8 backdrop-blur-sm">
+                  <h3 className="mb-6 text-xl font-semibold text-white">
+                    Profile Details
+                  </h3>
+                  <form onSubmit={handleProfileUpdate} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-300">
+                          Full Name
+                        </label>
+                        <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                          <input
+                            type="text"
+                            required
+                            value={profileData.name}
+                            onChange={(e) =>
+                              setProfileData({
+                                ...profileData,
+                                name: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-3 text-white placeholder-gray-500 backdrop-blur-sm focus:border-blue-500/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-300">
+                          Email Address
+                        </label>
+                        <div className="relative">
+                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                          <input
+                            type="email"
+                            required
+                            disabled
+                            value={profileData.email}
+                            className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-3 text-gray-400 cursor-not-allowed placeholder-gray-500"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-300">
+                          Phone Number
+                        </label>
+                        <div className="relative">
+                          <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                          <input
+                            type="tel"
+                            value={profileData.phone}
+                            onChange={(e) =>
+                              setProfileData({
+                                ...profileData,
+                                phone: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-3 text-white placeholder-gray-500 backdrop-blur-sm focus:border-blue-500/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-300">
+                        Bio
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={profileData.bio}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            bio: e.target.value,
+                          })
+                        }
+                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-500 backdrop-blur-sm focus:border-blue-500/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        placeholder="Tell us a little about yourself..."
+                      />
+                    </div>
+
+                    <div className="flex justify-end pt-4">
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        size="lg"
+                        isLoading={isLoading}
+                      >
+                        <Save className="h-4 w-4" />
+                        Save Changes
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              </motion.div>
+            )}
+
+            {/* --- SECURITY TAB --- */}
+            {activeTab === "security" && (
+              <motion.div
+                key="security"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-6"
+              >
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-8 backdrop-blur-sm">
+                  <h2 className="mb-6 text-xl font-semibold text-white">
+                    Change Password
+                  </h2>
+                  <form onSubmit={handlePasswordChange} className="space-y-6">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-300">
+                        Current Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showCurrentPassword ? "text" : "password"}
+                          required
+                          value={passwordData.currentPassword}
+                          onChange={(e) =>
+                            setPasswordData({
+                              ...passwordData,
+                              currentPassword: e.target.value,
+                            })
+                          }
+                          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-12 text-white placeholder-gray-400 focus:border-blue-500/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowCurrentPassword(!showCurrentPassword)
+                          }
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                        >
+                          {showCurrentPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-300">
+                          New Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showNewPassword ? "text" : "password"}
+                            required
+                            minLength={6}
+                            value={passwordData.newPassword}
+                            onChange={(e) =>
+                              setPasswordData({
+                                ...passwordData,
+                                newPassword: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-12 text-white placeholder-gray-400 focus:border-blue-500/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                          >
+                            {showNewPassword ? (
+                              <EyeOff className="h-5 w-5" />
+                            ) : (
+                              <Eye className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-300">
+                          Confirm Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showConfirmPassword ? "text" : "password"}
+                            required
+                            minLength={6}
+                            value={passwordData.confirmPassword}
+                            onChange={(e) =>
+                              setPasswordData({
+                                ...passwordData,
+                                confirmPassword: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-12 text-white placeholder-gray-400 focus:border-blue-500/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
+                            }
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-5 w-5" />
+                            ) : (
+                              <Eye className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        size="lg"
+                        isLoading={isLoading}
+                      >
+                        <Lock className="h-4 w-4" />
+                        Change Password
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 backdrop-blur-sm">
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    Device Sessions
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-300 font-medium">
+                        Log out of all devices
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        This will terminate sessions on all other devices.
+                      </p>
+                    </div>
+                    <Button
+                      onClick={handleLogoutAllDevices}
+                      variant="outline"
+                      className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Log Out All
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* --- NOTIFICATIONS TAB --- */}
+            {activeTab === "notifications" && (
+              <motion.div
+                key="notifications"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="rounded-2xl border border-white/10 bg-white/[0.02] p-8 backdrop-blur-sm"
+              >
+                <h2 className="mb-6 text-xl font-semibold text-white">
+                  Notification Preferences
+                </h2>
+                <div className="space-y-6">
+                  {Object.entries(notifications).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between py-4 border-b border-white/5 last:border-0"
+                    >
+                      <div>
+                        <p className="font-medium text-white capitalize">
+                          {key.replace(/([A-Z])/g, " $1").trim()}
+                        </p>
+                        <p className="text-sm text-gray-400 mt-1">
+                          Receive notifications for{" "}
+                          {key.replace(/([A-Z])/g, " $1").toLowerCase()}.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() =>
+                          setNotifications((prev) => ({
+                            ...prev,
+                            [key]: !value,
+                          }))
+                        }
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          value ? "bg-blue-500" : "bg-gray-700"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            value ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 flex justify-end">
+                  <Button
+                    onClick={handleSaveNotifications}
+                    variant="primary"
+                    isLoading={isLoading}
+                  >
+                    <Save className="h-4 w-4" />
+                    Save Preferences
+                  </Button>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.main>
-      </div>
-
-      {/* --- Glassmorphism Address Modal --- */}
-      <AnimatePresence>
-        {showAddressModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => {
-                setShowAddressModal(false);
-                resetAddressForm();
-              }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              // Modal Glass Style
-              className="relative w-full max-w-lg bg-white/80 dark:bg-[#1a1f2e]/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/50 dark:border-white/10 overflow-hidden z-10"
-            >
-              <div className="px-8 py-6 border-b border-gray-200/50 dark:border-white/10 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-white/5 dark:to-white/5">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  {editingAddress ? (
-                    <Edit size={20} className="text-blue-600" />
-                  ) : (
-                    <Plus size={20} className="text-blue-600" />
-                  )}
-                  {editingAddress ? "Edit Address" : "Add New Address"}
-                </h3>
-                <button
-                  onClick={() => {
-                    setShowAddressModal(false);
-                    resetAddressForm();
-                  }}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors p-1 bg-white/50 dark:bg-white/10 rounded-full hover:bg-gray-200 dark:hover:bg-white/20"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="p-8 space-y-5">
-                {/* Address Form Inputs */}
-                <div>
-                  <label className={labelClass + " mb-2"}>Address Type</label>
-                  <select
-                    value={addressData.addressType}
-                    onChange={(e) =>
-                      setAddressData({
-                        ...addressData,
-                        addressType: e.target.value,
-                      })
-                    }
-                    className={inputClass}
-                  >
-                    <option value="Home">Home (All day delivery)</option>
-                    <option value="Work">
-                      Work (Delivery between 10 AM - 5 PM)
-                    </option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className={labelClass + " mb-2"}>Street Address</label>
-                  <textarea
-                    value={addressData.street}
-                    onChange={(e) =>
-                      setAddressData({ ...addressData, street: e.target.value })
-                    }
-                    placeholder="Flat No, Building, Street Area"
-                    rows={2}
-                    className={inputClass + " resize-none"}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-5">
-                  <div>
-                    <label className={labelClass + " mb-2"}>City</label>
-                    <input
-                      type="text"
-                      value={addressData.city}
-                      onChange={(e) =>
-                        setAddressData({ ...addressData, city: e.target.value })
-                      }
-                      placeholder="Mumbai"
-                      className={inputClass}
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass + " mb-2"}>State</label>
-                    <input
-                      type="text"
-                      value={addressData.state}
-                      onChange={(e) =>
-                        setAddressData({
-                          ...addressData,
-                          state: e.target.value,
-                        })
-                      }
-                      placeholder="Maharashtra"
-                      className={inputClass}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass + " mb-2"}>PIN Code</label>
-                  <input
-                    type="text"
-                    value={addressData.pincode}
-                    onChange={(e) =>
-                      setAddressData({
-                        ...addressData,
-                        pincode: e.target.value,
-                      })
-                    }
-                    placeholder="400001"
-                    maxLength={6}
-                    className={inputClass}
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 pt-2 p-4 bg-blue-50/50 dark:bg-white/5 rounded-xl border border-blue-100 dark:border-white/5">
-                  <input
-                    type="checkbox"
-                    id="isDefault"
-                    checked={addressData.isDefault}
-                    onChange={(e) =>
-                      setAddressData({
-                        ...addressData,
-                        isDefault: e.target.checked,
-                      })
-                    }
-                    className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointerAccent-blue-600"
-                  />
-                  <label
-                    htmlFor="isDefault"
-                    className="text-sm font-medium text-gray-900 dark:text-white cursor-pointer select-none flex-1"
-                  >
-                    Set as default address for fast checkout
-                  </label>
-                </div>
-              </div>
-
-              <div className="p-8 pt-0">
-                <button
-                  onClick={
-                    editingAddress ? handleUpdateAddress : handleAddAddress
-                  }
-                  disabled={loading}
-                  className={"w-full " + primaryBtnClass + " py-4 text-base"}
-                >
-                  {loading
-                    ? "Saving..."
-                    : editingAddress
-                      ? "Update Address"
-                      : "Save Address"}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// Updated Loading Skeleton to match new style
-function LoadingSkeleton() {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black pt-24 px-4">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-8">
-        <div className="w-full md:w-1/4 h-96 bg-white/50 dark:bg-white/5 backdrop-blur-xl rounded-3xl border border-white/20 animate-pulse shadow-xl" />
-        <div className="flex-1 h-[32rem] bg-white/50 dark:bg-white/5 backdrop-blur-xl rounded-3xl border border-white/20 animate-pulse shadow-xl" />
+        </div>
       </div>
     </div>
   );
