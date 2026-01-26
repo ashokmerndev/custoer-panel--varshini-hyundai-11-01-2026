@@ -58,38 +58,38 @@ export default function LoginPage() {
   const { login, loading, user } = useAuth();
   const router = useRouter();
 
-  // --- 🖱️ NEW: Cursor Move / Tilt Animation Logic ---
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
+  // // --- 🖱️ NEW: Cursor Move / Tilt Animation Logic ---
+  // const x = useMotionValue(0);
+  // const y = useMotionValue(0);
 
-  // Create smooth spring physics for the tilt
-  const rotateX = useSpring(useTransform(y, [-300, 300], [5, -5]), {
-    stiffness: 150,
-    damping: 20,
-  });
-  const rotateY = useSpring(useTransform(x, [-300, 300], [-5, 5]), {
-    stiffness: 150,
-    damping: 20,
-  });
+  // // Create smooth spring physics for the tilt
+  // const rotateX = useSpring(useTransform(y, [-300, 300], [5, -5]), {
+  //   stiffness: 150,
+  //   damping: 20,
+  // });
+  // const rotateY = useSpring(useTransform(x, [-300, 300], [-5, 5]), {
+  //   stiffness: 150,
+  //   damping: 20,
+  // });
 
-  function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
+  // function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
+  //   const rect = event.currentTarget.getBoundingClientRect();
+  //   const width = rect.width;
+  //   const height = rect.height;
 
-    // Calculate mouse position relative to center of card
-    const mouseX = event.clientX - rect.left - width / 2;
-    const mouseY = event.clientY - rect.top - height / 2;
+  //   // Calculate mouse position relative to center of card
+  //   const mouseX = event.clientX - rect.left - width / 2;
+  //   const mouseY = event.clientY - rect.top - height / 2;
 
-    x.set(mouseX);
-    y.set(mouseY);
-  }
+  //   x.set(mouseX);
+  //   y.set(mouseY);
+  // }
 
-  function handleMouseLeave() {
-    // Reset to center when mouse leaves
-    x.set(0);
-    y.set(0);
-  }
+  // function handleMouseLeave() {
+  //   // Reset to center when mouse leaves
+  //   x.set(0);
+  //   y.set(0);
+  // }
   // --------------------------------------------------
 
   useEffect(() => {
@@ -210,15 +210,15 @@ export default function LoginPage() {
         variants={cardVariants}
         initial="hidden"
         animate="show"
-        // 🆕 Added Mouse Events for Tilt Animation
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        // // 🆕 Added Mouse Events for Tilt Animation
+        // onMouseMove={handleMouseMove}
+        // onMouseLeave={handleMouseLeave}
         // 🆕 Applied Rotation Styles
-        style={{
-          rotateX: rotateX,
-          rotateY: rotateY,
-          transformStyle: "preserve-3d", // Helps with 3D effect
-        }}
+        // style={{
+        //   // rotateX: rotateX,
+        //   // rotateY: rotateY,
+        //   // transformStyle: "preserve-3d", // Helps with 3D effect
+        // }}
         className={`w-full max-w-[1000px] min-h-[600px] rounded-[32px] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 relative z-10 transition-colors duration-500 border ${
           isDarkMode
             ? "bg-[#0f172a]/60 backdrop-blur-2xl border-white/10 shadow-black/50"

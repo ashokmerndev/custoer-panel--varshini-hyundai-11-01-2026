@@ -65,33 +65,33 @@ export default function RegisterPage() {
   const { register, loading, user } = useAuth();
   const router = useRouter();
 
-  // --- 🖱️ 3D Tilt Animation Logic ---
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
+  // // --- 🖱️ 3D Tilt Animation Logic ---
+  // const x = useMotionValue(0);
+  // const y = useMotionValue(0);
 
-  const rotateX = useSpring(useTransform(y, [-300, 300], [5, -5]), {
-    stiffness: 150,
-    damping: 20,
-  });
-  const rotateY = useSpring(useTransform(x, [-300, 300], [-5, 5]), {
-    stiffness: 150,
-    damping: 20,
-  });
+  // const rotateX = useSpring(useTransform(y, [-300, 300], [5, -5]), {
+  //   stiffness: 150,
+  //   damping: 20,
+  // });
+  // const rotateY = useSpring(useTransform(x, [-300, 300], [-5, 5]), {
+  //   stiffness: 150,
+  //   damping: 20,
+  // });
 
-  function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseX = event.clientX - rect.left - width / 2;
-    const mouseY = event.clientY - rect.top - height / 2;
-    x.set(mouseX);
-    y.set(mouseY);
-  }
+  // function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
+  //   const rect = event.currentTarget.getBoundingClientRect();
+  //   const width = rect.width;
+  //   const height = rect.height;
+  //   const mouseX = event.clientX - rect.left - width / 2;
+  //   const mouseY = event.clientY - rect.top - height / 2;
+  //   x.set(mouseX);
+  //   y.set(mouseY);
+  // }
 
-  function handleMouseLeave() {
-    x.set(0);
-    y.set(0);
-  }
+  // function handleMouseLeave() {
+  //   x.set(0);
+  //   y.set(0);
+  // }
   // ----------------------------------
 
   useEffect(() => {
@@ -218,13 +218,13 @@ export default function RegisterPage() {
         variants={cardVariants}
         initial="hidden"
         animate="show"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          rotateX: rotateX,
-          rotateY: rotateY,
-          transformStyle: "preserve-3d",
-        }}
+        // onMouseMove={handleMouseMove}
+        // onMouseLeave={handleMouseLeave}
+        // style={{
+        //   rotateX: rotateX,
+        //   rotateY: rotateY,
+        //   transformStyle: "preserve-3d",
+        // }}
         className={`w-full max-w-[1000px] min-h-[600px] rounded-[32px] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 relative z-10 transition-colors duration-500 border ${
           isDarkMode
             ? "bg-[#0f172a]/60 backdrop-blur-2xl border-white/10 shadow-black/50"

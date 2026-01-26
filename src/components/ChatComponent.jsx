@@ -926,13 +926,21 @@ export default function ChatComponent({
     newSocket.on("connect", () => {
       // console.log("Connected to socket");
       newSocket.emit("join_room", { roomId });
+      // NEW LINE: అడ్మిన్ ఆన్‌లైన్‌లో ఉన్నారా లేదా అని చెక్ చేయమని రిక్వెస్ట్ పంపాలి
+      newSocket.emit("check_online_status", { userId: otherUserId });
       fetchChatHistory();
+    });
+
+    newSocket.on("is_user_online_response", (data) => {
+      if (String(data.userId) === String(otherUserId)) {
+        setOnlineStatus(data.isOnline ? "online" : "offline");
+      }
     });
 
     // 2. Online Status (Matches Backend 'user_status_update')
     newSocket.on("user_status_update", (data) => {
       // Check if the update is for the user we are chatting with
-      if (data.userId === otherUserId) {
+      if (String(data.userId) === String(otherUserId)) {
         setOnlineStatus(data.isOnline ? "online" : "offline");
       }
     });
